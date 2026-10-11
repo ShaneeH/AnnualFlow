@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { Dashboard } from './dashboard';
+import { provideRouter } from '@angular/router';
+
+import { Dashboard, buildKpiCards } from './dashboard';
 import { CompanyService } from '../../core/services/company.service';
 
 describe('Dashboard', () => {
@@ -27,6 +29,7 @@ describe('Dashboard', () => {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
       providers: [
+        provideRouter([]),
         { provide: CompanyService, useValue: companyService }
       ]
     }).compileComponents();
@@ -190,5 +193,50 @@ describe('Dashboard', () => {
 
     expect(component.errorMessage).toBe('Failed to load companies.');
     expect(component.isLoadingCompanies).toBe(false);
+  });
+
+  it('should link the hero button to the create report flow', () => {
+    const link: HTMLAnchorElement | null =
+      fixture.nativeElement.querySelector('a.create-report-button');
+
+    expect(link?.textContent).toContain('Create new report');
+    expect(link?.getAttribute('href')).toBe('/documents/new');
+  });
+
+  it('should only build KPI cards for metrics that exist', () => {
+    const cards = buildKpiCards({
+      financials: {
+        revenue: 1000,
+        grossProfit: null,
+        netProfit: 100,
+        totalAssets: 5000,
+        eps: null
+      },
+      metrics: { netMargin: 10, grossMargin: null, returnOnEquity: null },
+      comparison: { revenueGrowth: 5 }
+    } as any);
+
+    expect(cards.map(card => card.title)).toEqual([
+      'Revenue',
+      'Net Profit',
+      'Total Assets',
+      'Net Margin'
+    ]);
+    expect(cards[0].change).toBe(5);
+    expect(cards[1].change).toBeNull();
+  });
+
+  it('should hide charts that have no data', () => {
+    companyService.getPeriods.mockReturnValue(of([]));
+    companyService.getHistory.mockReturnValue(of([
+      { period: 'FY2024', periodLabel: 'FY 2024', revenue: 100, customers: null, grossMargin: null, operatingMargin: null, ebitdaMargin: null, netMargin: 12 },
+      { period: 'FY2025', periodLabel: 'FY 2025', revenue: 120, customers: null, grossMargin: null, operatingMargin: null, ebitdaMargin: null, netMargin: null }
+    ]));
+
+    component.onCompanySelected({ label: 'Senus PLC', value: 1 });
+
+    expect(component.showRevenueChart).toBe(true);
+    expect(component.showMarginsChart).toBe(true);
+    expect(component.showCustomerChart).toBe(false);
   });
 });

@@ -24,8 +24,8 @@ export class CustomerChartComponent {
 
       datasets: [{
         label: 'Customers',
-        // Convert each period's customer count to a number (fallback to 0).
-        data: history.map(period => Number(period.customers ?? 0)),
+        // Missing periods are left as gaps rather than shown as zero.
+        data: history.map(period => period.customers ?? null),
         borderWidth: 1,
         borderRadius: 6,          // Rounded bar corners
         borderSkipped: false,     

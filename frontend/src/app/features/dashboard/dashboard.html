@@ -1,8 +1,14 @@
 <section class="dashboard">
   <!-- Page title and short description -->
   <header class="dashboard-header">
-    <h1>Financial Dashboard</h1>
-    <p>Select a company and reporting period to view financial performance and key metrics.</p>
+    <div class="dashboard-header-text">
+      <h1>Financial Dashboard</h1>
+      <p>Select a company and reporting period to view financial performance and key metrics.</p>
+    </div>
+    <a routerLink="/documents/new" class="create-report-button create-report-button--large">
+      <span aria-hidden="true">＋</span>
+      Create new report
+    </a>
   </header>
   @if (errorMessage) {
     <div class="dashboard-error" role="alert">
@@ -80,91 +86,52 @@
         }
       </section>
 
-      <!-- Main KPI cards for the selected report -->
-      <div class="kpi-grid">
-        <app-kpi-card
-          title="Revenue"
-          format="currency"
-          [value]="financialPeriod.financials.revenue"
-          [change]="financialPeriod.comparison?.revenueGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Gross Profit"
-          format="currency"
-          [value]="financialPeriod.financials.grossProfit"
-          [change]="financialPeriod.comparison?.grossProfitGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Operating Profit"
-          format="currency"
-          [value]="financialPeriod.financials.operatingProfit"
-          [change]="financialPeriod.comparison?.operatingProfitGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="EBITDA"
-          format="currency"
-          [value]="financialPeriod.financials.ebitda"
-          [change]="financialPeriod.comparison?.ebitdaGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Net Profit"
-          format="currency"
-          [value]="financialPeriod.financials.netProfit"
-          [change]="financialPeriod.comparison?.netProfitGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Cash"
-          format="currency"
-          [value]="financialPeriod.financials.cash"
-          [change]="financialPeriod.comparison?.cashGrowth ?? null"
-        />
-
-        <app-kpi-card title="Debt"
-          format="currency"
-          [value]="financialPeriod.financials.debt"
-          [change]="financialPeriod.comparison?.debtGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Customers"
-          format="number"
-          [value]="financialPeriod.financials.customers"
-          [change]="financialPeriod.comparison?.customerGrowth ?? null"
-        />
-
-        <app-kpi-card
-          title="Net Assets"
-          format="currency"
-          [value]="financialPeriod.financials.netAssets"
-          [change]="financialPeriod.comparison?.netAssetGrowth ?? null"
-        />
-      </div>
+      <!-- KPI cards: only metrics this report actually contains are shown -->
+      @if (kpiCards.length > 0) {
+        <div class="kpi-grid">
+          @for (card of kpiCards; track card.title) {
+            <app-kpi-card
+              [title]="card.title"
+              [format]="card.format"
+              [value]="card.value"
+              [change]="card.change"
+            />
+          }
+        </div>
+      } @else {
+        <p class="dashboard-status">No financial figures were extracted for this period.</p>
+      }
     }
 
-    <!-- Historical charts – only shown when history data is available -->
-    @if (history.length > 0) {
+    <!-- Historical charts: each chart only renders when its data exists -->
+    @if (showRevenueChart || showMarginsChart || showCustomerChart) {
       <section class="history-section">
         <div class="history-heading">
           <span>All Reports</span>
           <h2>Performance Over Time</h2>
         </div>
 
-        <!-- Charts use all available reporting periods -->
         <div class="history-charts">
-          <div class="history-chart-card">
-            <h4>Revenue</h4>
-            <app-revenue-chart [history]="history" />
-          </div>
+          @if (showRevenueChart) {
+            <div class="history-chart-card">
+              <h4>Revenue</h4>
+              <app-revenue-chart [history]="history" />
+            </div>
+          }
 
-          <div class="history-chart-card">
-            <h4>Customer Growth</h4>
-            <app-customer-chart [history]="history" />
-          </div>
+          @if (showMarginsChart) {
+            <div class="history-chart-card">
+              <h4>Profit Margins</h4>
+              <app-margins-chart [history]="history" />
+            </div>
+          }
+
+          @if (showCustomerChart) {
+            <div class="history-chart-card">
+              <h4>Customer Growth</h4>
+              <app-customer-chart [history]="history" />
+            </div>
+          }
         </div>
       </section>
     }

@@ -24,4 +24,12 @@ export interface FinancialReportPeriod {
 
     netAssets: number | null;
 
+    operatingCashFlow: number | null;
+
+    totalAssets: number | null;
+
+    totalLiabilities: number | null;
+
+    eps: number | null;
+
 }

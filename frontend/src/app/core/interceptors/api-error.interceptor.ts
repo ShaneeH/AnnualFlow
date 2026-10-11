@@ -6,7 +6,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly requestId: string | null
+    readonly requestId: string | null,
+    readonly code: string | null = null
   ) {
     super(message);
     this.name = 'ApiError';
@@ -42,15 +43,28 @@ export const apiErrorInterceptor: HttpInterceptorFn = (req, next) =>
         return throwError(() => error);
       }
 
-      const body = error.error as { requestId?: unknown } | null;
+      const body = error.error as { requestId?: unknown; code?: unknown } | null;
+      const code = body && typeof body.code === 'string' ? body.code : null;
       const requestId =
         (body && typeof body.requestId === 'string' ? body.requestId : null) ??
         error.headers?.get('X-Request-Id') ??
         null;
 
-      return throwError(() => new ApiError(messageFor(error), error.status, requestId));
+      return throwError(() => new ApiError(messageFor(error), error.status, requestId, code));
     })
   );
+
+/** Machine-readable error code from the backend (e.g. NOT_FINANCIAL_REPORT). */
+export function errorCode(error: unknown): string | null {
+  if (error instanceof ApiError) return error.code;
+
+  if (error instanceof HttpErrorResponse) {
+    const body = error.error as { code?: unknown } | null;
+    return body && typeof body.code === 'string' ? body.code : null;
+  }
+
+  return null;
+}
 
 /** Extracts a displayable message from any error thrown by an API call. */
 export function errorMessage(error: unknown, fallback: string): string {

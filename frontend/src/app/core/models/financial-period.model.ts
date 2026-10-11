@@ -8,6 +8,10 @@ export interface FinancialComparison {
     debtGrowth: number | null;
     customerGrowth: number | null;
     netAssetGrowth: number | null;
+    operatingCashFlowGrowth?: number | null;
+    totalAssetsGrowth?: number | null;
+    totalLiabilitiesGrowth?: number | null;
+    epsGrowth?: number | null;
 }
 
 export interface FinancialPeriod {
@@ -28,6 +32,10 @@ export interface FinancialPeriod {
         debt: number | null;
         customers: number | null;
         netAssets: number | null;
+        operatingCashFlow?: number | null;
+        totalAssets?: number | null;
+        totalLiabilities?: number | null;
+        eps?: number | null;
     };
 
     metrics: {
@@ -40,6 +48,12 @@ export interface FinancialPeriod {
         revenuePerCustomer: number | null;
         roce: number | null;
         debtServiceCoverageRatio: number | null;
+        operatingCashFlowMargin?: number | null;
+        cashConversion?: number | null;
+        returnOnEquity?: number | null;
+        returnOnAssets?: number | null;
+        debtToEquity?: number | null;
+        liabilitiesToAssets?: number | null;
     };
 
     comparison?: FinancialComparison;

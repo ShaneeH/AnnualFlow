@@ -30,6 +30,11 @@
 .dashboard-header {
   margin-bottom: clamp(1.75rem, 4vw, 3rem);
   position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
 }
 
 
