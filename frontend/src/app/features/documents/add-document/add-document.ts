@@ -1,7 +1,7 @@
 import { Component, inject, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { errorMessage } from '../../../core/interceptors/api-error.interceptor';
+import { errorCode, errorMessage } from '../../../core/interceptors/api-error.interceptor';
 import { UploadReportResponse } from '../../../core/models/upload-report.model';
 import { CompanyService } from '../../../core/services/company.service';
 
@@ -28,6 +28,8 @@ export class AddDocument {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   conflictMessage: string | null = null;
+  // Set when the backend refused the file because it is not a financial report.
+  rejectionMessage: string | null = null;
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -56,6 +58,7 @@ export class AddDocument {
 
     this.selectedFile = file;
     this.uploadedFileName = null;
+    this.rejectionMessage = null;
     this.errorMessage = null;
     this.successMessage = null;
   }
@@ -70,6 +73,7 @@ export class AddDocument {
     this.errorMessage = null;
     this.successMessage = null;
     this.conflictMessage = null;
+    this.rejectionMessage = null;
 
     this.companyService.addDocument(this.selectedFile).subscribe({
       next: (response: UploadReportResponse) => {
@@ -88,6 +92,16 @@ export class AddDocument {
       },
 
       error: (error: unknown) => {
+        if (errorCode(error) === 'NOT_FINANCIAL_REPORT') {
+          this.rejectionMessage = errorMessage(
+            error,
+            'This document does not look like a financial report, so it was not saved.'
+          );
+          this.selectedFile = null;
+          this.isUploading = false;
+          return;
+        }
+
         this.errorMessage = errorMessage(
           error,
           'Something went wrong while analysing the document.'
@@ -104,5 +118,6 @@ export class AddDocument {
     this.successMessage = null;
     this.errorMessage = null;
     this.conflictMessage = null;
+    this.rejectionMessage = null;
   }
 }

@@ -351,3 +351,43 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   .add-document { padding: 2.5rem 1.25rem 4rem; }
   .page-header h1 { font-size: 2rem; }
 }
+.rejection-card {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+  color: #fde68a;
+
+  p {
+    margin: 0.5rem 0 0;
+    line-height: 1.5;
+  }
+
+  .rejection-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #fbbf24;
+  }
+
+  .rejection-hint {
+    color: #d4d4d8;
+    font-size: 0.9rem;
+  }
+
+  .rejection-retry {
+    margin-top: 0.85rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.6);
+    background: transparent;
+    color: #fbbf24;
+    cursor: pointer;
+  }
+}
+
+.conflict-message {
+  color: #fbbf24;
+}

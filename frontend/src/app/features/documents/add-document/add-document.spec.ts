@@ -166,4 +166,33 @@ describe('AddDocument', () => {
 
     expect(component.isUploading).toBe(false);
   });
+
+  it('should show a dedicated rejection card for non-financial documents', () => {
+    component.selectedFile = new File(['%PDF-'], 'shane-cv.pdf', {
+      type: 'application/pdf'
+    });
+
+    companyService.addDocument.mockReturnValue(
+      throwError(() => new HttpErrorResponse({
+        status: 422,
+        error: {
+          success: false,
+          code: 'NOT_FINANCIAL_REPORT',
+          error: 'This document does not look like a financial report (detected: CV / Resume), so it was not saved.'
+        }
+      }))
+    );
+
+    component.uploadDocument();
+    fixture.detectChanges();
+
+    expect(component.rejectionMessage).toContain('CV / Resume');
+    expect(component.errorMessage).toBeNull();
+    expect(component.selectedFile).toBeNull();
+    expect(component.isUploading).toBe(false);
+
+    const card: HTMLElement | null = fixture.nativeElement.querySelector('.rejection-card');
+    expect(card?.textContent).toContain('Not a financial report');
+    expect(card?.textContent).toContain('Nothing was saved');
+  });
 });

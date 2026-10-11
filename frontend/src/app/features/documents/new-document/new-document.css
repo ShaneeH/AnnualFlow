@@ -1,0 +1,15 @@
+.new-document-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem) 0;
+}
+
+.back-link {
+  color: #a1a1aa;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  color: #ffffff;
+}

@@ -1,3 +1,10 @@
-<app-add-document (documentAdded)="viewDocuments.loadDocuments()" />
+<section class="documents-page">
+  <div class="documents-toolbar">
+    <a routerLink="/documents/new" class="create-report-button">
+      <span aria-hidden="true">＋</span>
+      Add new report
+    </a>
+  </div>
 
-<app-view-documents #viewDocuments />
+  <app-view-documents />
+</section>
