@@ -12,7 +12,7 @@
     <input
       #fileInput
       type="file"
-      accept="application/pdf"
+      accept=".pdf,application/pdf"
       hidden
       (change)="onFileSelected($event)"
     />
@@ -90,6 +90,9 @@
         <span class="success-label">Document processed</span>
         <h2>{{ uploadedFileName }}</h2>
         <p>{{ successMessage }}</p>
+        @if (conflictMessage) {
+          <p class="conflict-message">{{ conflictMessage }}</p>
+        }
         <p class="success-note">
           This report is now available in your dashboard.
         </p>

@@ -1,9 +1,13 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { errorMessage } from '../../../core/interceptors/api-error.interceptor';
 import { UploadReportResponse } from '../../../core/models/upload-report.model';
 import { CompanyService } from '../../../core/services/company.service';
+
+// Matches the backend default MAX_PDF_SIZE_MB.
+const MAX_PDF_SIZE_MB = 20;
+const MAX_PDF_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 @Component({
   selector: 'app-add-document',
@@ -23,6 +27,7 @@ export class AddDocument {
 
   successMessage: string | null = null;
   errorMessage: string | null = null;
+  conflictMessage: string | null = null;
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -30,9 +35,22 @@ export class AddDocument {
 
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
+    // Some browsers report an empty MIME type for PDFs, so accept either
+    // a PDF MIME type or a .pdf extension, and require the extension.
+    const hasPdfExtension = file.name.toLowerCase().endsWith('.pdf');
+    const hasPdfType = file.type === '' || file.type === 'application/pdf';
+
+    if (!hasPdfExtension || !hasPdfType) {
       this.errorMessage = 'Please select a PDF document.';
       this.selectedFile = null;
+      input.value = '';
+      return;
+    }
+
+    if (file.size > MAX_PDF_BYTES) {
+      this.errorMessage = `The PDF is larger than the ${MAX_PDF_SIZE_MB} MB limit.`;
+      this.selectedFile = null;
+      input.value = '';
       return;
     }
 
@@ -51,24 +69,29 @@ export class AddDocument {
     this.isUploading = true;
     this.errorMessage = null;
     this.successMessage = null;
+    this.conflictMessage = null;
 
     this.companyService.addDocument(this.selectedFile).subscribe({
       next: (response: UploadReportResponse) => {
-        console.log('Upload response:', response);
-
         this.uploadedFileName = this.selectedFile?.name ?? null;
         this.successMessage = 'Document analysed and added successfully.';
+
+        const conflicts = response.conflicts ?? [];
+        if (conflicts.length) {
+          const fields = conflicts.map(c => `${c.period} ${c.field}`).join(', ');
+          this.conflictMessage =
+            `This upload updated figures that were already stored: ${fields}.`;
+        }
         this.selectedFile = null;
         this.isUploading = false;
         this.documentAdded.emit();
       },
 
-      error: (error: HttpErrorResponse) => {
-        console.error('Failed to upload document:', error);
-
-        this.errorMessage =
-          error.error?.error ??
-          'Something went wrong while analysing the document.';
+      error: (error: unknown) => {
+        this.errorMessage = errorMessage(
+          error,
+          'Something went wrong while analysing the document.'
+        );
 
         this.isUploading = false;
       }
@@ -80,5 +103,6 @@ export class AddDocument {
     this.uploadedFileName = null;
     this.successMessage = null;
     this.errorMessage = null;
+    this.conflictMessage = null;
   }
 }

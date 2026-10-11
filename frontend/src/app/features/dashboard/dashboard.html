@@ -4,12 +4,21 @@
     <h1>Financial Dashboard</h1>
     <p>Select a company and reporting period to view financial performance and key metrics.</p>
   </header>
-  @if (emptyData == true) {
+  @if (errorMessage) {
+    <div class="dashboard-error" role="alert">
+      <p>{{ errorMessage }}</p>
+      <button type="button" (click)="retry()">Try again</button>
+    </div>
+  }
+
+  @if (isLoadingCompanies) {
+    <p class="dashboard-status" aria-live="polite">Loading companies…</p>
+  } @else if (emptyData) {
     <h2>No reports available</h2>
     <h4>Add a financial report to get started.</h4>
   }
 
-  @if (emptyData == false) {
+  @if (!isLoadingCompanies && !emptyData && companies.length > 0) {
     <!-- Toolbar: company, period, and comparison selectors -->
     <div class="dashboard-toolbar">
       <div class="toolbar-item">
@@ -42,6 +51,10 @@
         />
       </div>
     </div>
+
+    @if (isLoadingCompany || isLoadingPeriod) {
+      <p class="dashboard-status" aria-live="polite">Loading financial data…</p>
+    }
 
     <!-- Shown once a financial period has been selected -->
     @if (financialPeriod) {

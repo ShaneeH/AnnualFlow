@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 
+import { errorMessage } from '../../../core/interceptors/api-error.interceptor';
 import { FinancialDocument } from '../../../core/models/document.model';
 import { CompanyService } from '../../../core/services/company.service';
 
@@ -35,10 +35,11 @@ export class ViewDocuments implements OnInit {
         this.documents = documents;
         this.isLoading = false;
       },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.error ??
-          'Something went wrong while loading the documents.';
+      error: (error: unknown) => {
+        this.errorMessage = errorMessage(
+          error,
+          'Something went wrong while loading the documents.'
+        );
         this.isLoading = false;
       }
     });
@@ -68,10 +69,11 @@ export class ViewDocuments implements OnInit {
         this.pendingDeleteId = null;
         this.deletingDocumentId = null;
       },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.error ??
-          'Something went wrong while deleting the document.';
+      error: (error: unknown) => {
+        this.errorMessage = errorMessage(
+          error,
+          'Something went wrong while deleting the document.'
+        );
         this.deletingDocumentId = null;
       }
     });
