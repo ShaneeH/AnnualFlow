@@ -18,28 +18,35 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./features/dashboard/dashboard').then(m => m.Dashboard),
-        title: 'Senus | Dashboard'
+        title: 'Report Hub | Dashboard'
       },
 
       {
         path: 'about',
         loadComponent: () =>
           import('./features/about/about').then(m => m.About),
-        title: 'Senus | About'
+        title: 'Report Hub | About'
+      },
+
+      {
+        path: 'documents/new',
+        loadComponent: () =>
+          import('./features/documents/new-document/new-document').then(m => m.NewDocument),
+        title: 'Report Hub | Create New Report'
       },
 
       {
         path: 'documents',
         loadComponent: () =>
           import('./features/documents/documents').then(m => m.Documents),
-        title: 'Senus | Documents'
+        title: 'Report Hub | My Reports'
       },
 
       {
         path: '**',
         loadComponent: () =>
           import('./layout/not-found/not-found').then(m => m.NotFound),
-        title: 'Senus | Page Not Found'
+        title: 'Report Hub | Page Not Found'
       }
     ]
   }

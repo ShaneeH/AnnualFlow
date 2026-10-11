@@ -1,12 +1,11 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <h2 routerLink="/dashboard" class="navbar-logo">ReportHub</h2>
+    <a routerLink="/" class="navbar-logo" aria-label="Report Hub home">Report Hub</a>
   </div>
 
   <div class="navbar-links">
-    <a routerLink="/dashboard">Dashboard</a>
-    <a routerLink="/documents">Add / View Documents</a>
-    <a routerLink="/about">About</a>
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/documents" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Add / View Reports</a>
+    <a routerLink="/about" routerLinkActive="active">About</a>
   </div>
-
 </nav>

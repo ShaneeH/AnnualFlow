@@ -26,6 +26,11 @@
   color: #ffffff;
   cursor: pointer;
   letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.navbar-links a.active {
+  color: #ffffff;
 }
 
 /* Center links */

@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "report-hub-backend",
   "version": "2.0.0",
   "description": "Secure financial document processing and reporting API",
   "main": "index.js",

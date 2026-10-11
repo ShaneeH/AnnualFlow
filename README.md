@@ -1,4 +1,6 @@
-# AI Financial Document Intelligence Platform
+# Report Hub
+
+**AI Financial Document Intelligence Platform**
 
 An intelligent platform that turns complex financial reports into clear, structured data automatically.
 

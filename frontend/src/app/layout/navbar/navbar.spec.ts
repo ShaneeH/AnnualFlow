@@ -25,4 +25,12 @@ describe('Navbar', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should show "Report Hub" as a link to the home page', () => {
+    const logo: HTMLAnchorElement | null =
+      fixture.nativeElement.querySelector('a.navbar-logo');
+
+    expect(logo?.textContent?.trim()).toBe('Report Hub');
+    expect(logo?.getAttribute('href')).toBe('/');
+  });
 });
