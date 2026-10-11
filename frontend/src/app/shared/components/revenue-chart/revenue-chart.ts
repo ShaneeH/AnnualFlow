@@ -33,7 +33,7 @@ export class RevenueChartComponent {
       datasets: [
         {
           label: 'Revenue',
-          data: history.map(item => Number(item.revenue)),
+          data: history.map(item => item.revenue ?? null),
           borderColor: '#ffffff',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
           borderWidth: 2,

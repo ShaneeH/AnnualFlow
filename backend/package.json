@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "db:migrate": "npm run build && node dist/database/migrate.js",
-    "test": "npm run build && node --test dist/*.test.js dist/**/*.test.js",
+    "test": "npm run build && node --require ./dist/test-setup.js --test dist/*.test.js dist/**/*.test.js",
     "check": "npm test"
   },
   "keywords": [],

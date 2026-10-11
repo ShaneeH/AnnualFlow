@@ -1,5 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, Observable, Subject, catchError, finalize, forkJoin, switchMap, tap } from 'rxjs';
 
+import { errorMessage } from '../../core/interceptors/api-error.interceptor';
+import { CompanyPeriod } from '../../core/models/company-period.model';
 import { CompanyService } from '../../core/services/company.service';
 import { FinancialPeriod } from '../../core/models/financial-period.model';
 import { HistoryPeriod } from '../../core/models/history-period.model';
@@ -9,6 +13,12 @@ import { DropdownOption, DropdownSelectComponent } from '../../shared/components
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card';
 import { RevenueChartComponent } from '../../shared/components/revenue-chart/revenue-chart';
 
+interface PeriodRequest {
+  companyId: number;
+  period: string;
+  compareTo?: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -17,7 +27,14 @@ import { RevenueChartComponent } from '../../shared/components/revenue-chart/rev
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
-  private companyService = inject(CompanyService);
+  private readonly companyService = inject(CompanyService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Selections flow through these subjects. switchMap cancels the previous
+  // request, so a slow response for an old selection can never overwrite
+  // the data for the current one.
+  private readonly companyChanges = new Subject<number>();
+  private readonly periodChanges = new Subject<PeriodRequest>();
 
   // Dropdown data loaded from the backend.
   companies: DropdownOption<number>[] = [];
@@ -35,12 +52,37 @@ export class Dashboard implements OnInit {
   financialPeriod: FinancialPeriod | null = null;
   companyName = '';
 
-  emptyData: boolean = true;
+  // View state.
+  isLoadingCompanies = false;
+  isLoadingCompany = false;
+  isLoadingPeriod = false;
+  emptyData = false;
+  errorMessage: string | null = null;
 
   ngOnInit(): void {
-    // Load available companies when the dashboard first opens.
+    this.companyChanges
+      .pipe(
+        tap(() => {
+          this.isLoadingCompany = true;
+          this.errorMessage = null;
+        }),
+        switchMap(companyId => this.loadCompanyData(companyId)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+
+    this.periodChanges
+      .pipe(
+        tap(() => {
+          this.isLoadingPeriod = true;
+          this.errorMessage = null;
+        }),
+        switchMap(request => this.loadFinancialPeriod(request)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+
     this.loadCompanies();
-   
   }
 
   onCompanySelected(company: DropdownOption<number>): void {
@@ -55,8 +97,7 @@ export class Dashboard implements OnInit {
     this.comparePeriods = [];
     this.history = [];
 
-    this.loadPeriods(company.value);
-    this.loadHistory(company.value);
+    this.companyChanges.next(company.value);
   }
 
   onPeriodSelected(period: DropdownOption<string>): void {
@@ -68,15 +109,10 @@ export class Dashboard implements OnInit {
 
     if (!this.selectedCompany) return;
 
-    // Load the main financial data for the selected period.
-    this.companyService
-      .getFinancialPeriod(this.selectedCompany.value, period.value)
-      .subscribe({
-        next: financialPeriod => {
-          this.financialPeriod = financialPeriod;
-        },
-        error: error => console.error('Failed to load financial period.', error)
-      });
+    this.periodChanges.next({
+      companyId: this.selectedCompany.value,
+      period: period.value
+    });
   }
 
   onComparePeriodSelected(comparePeriod: DropdownOption<string>): void {
@@ -84,50 +120,79 @@ export class Dashboard implements OnInit {
 
     if (!this.selectedCompany || !this.selectedPeriod) return;
 
-    // Reload the period with comparison data included.
+    this.periodChanges.next({
+      companyId: this.selectedCompany.value,
+      period: this.selectedPeriod.value,
+      compareTo: comparePeriod.value
+    });
+  }
+
+  retry(): void {
+    this.errorMessage = null;
+
+    if (!this.companies.length) {
+      this.loadCompanies();
+    } else if (this.selectedCompany) {
+      this.onCompanySelected(this.selectedCompany);
+    }
+  }
+
+  private loadCompanies(): void {
+    this.isLoadingCompanies = true;
+    this.errorMessage = null;
+
     this.companyService
-      .getFinancialPeriod(this.selectedCompany.value, this.selectedPeriod.value, comparePeriod.value)
+      .getCompanies()
+      .pipe(
+        finalize(() => (this.isLoadingCompanies = false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
-        next: financialPeriod => {
-          this.financialPeriod = financialPeriod;
+        next: companies => {
+          this.companies = companies.map(company => ({
+            label: company.companyName,
+            value: company.companyId
+          }));
+
+          this.emptyData = companies.length === 0;
         },
-        error: error => console.error('Failed to compare financial periods.', error)
+        error: error => {
+          this.errorMessage = errorMessage(error, 'Failed to load companies.');
+        }
       });
   }
-private loadCompanies(): void {
-  this.companyService.getCompanies().subscribe({
-    next: companies => {
-      this.companies = companies.map(company => ({
-        label: company.companyName,
-        value: company.companyId
-      }));
 
-      this.emptyData = companies.length === 0;
-    },
-    error: error => console.error('Failed to load companies.', error)
-  });
-}
-
-  private loadPeriods(companyId: number): void {
-    this.companyService.getPeriods(companyId).subscribe({
-      next: periods => {
-        // Convert the company's periods into dropdown options.
+  private loadCompanyData(companyId: number): Observable<unknown> {
+    return forkJoin({
+      periods: this.companyService.getPeriods(companyId),
+      history: this.companyService.getHistory(companyId)
+    }).pipe(
+      tap(({ periods, history }: { periods: CompanyPeriod[]; history: HistoryPeriod[] }) => {
         this.periods = periods.map(period => ({
           label: period.periodLabel,
           value: period.period
         }));
-      },
-      error: error => console.error('Failed to load company periods.', error)
-    });
+        this.history = history;
+      }),
+      catchError(error => {
+        this.errorMessage = errorMessage(error, 'Failed to load company data.');
+        return EMPTY;
+      }),
+      finalize(() => (this.isLoadingCompany = false))
+    );
   }
 
-  private loadHistory(companyId: number): void {
-    this.companyService.getHistory(companyId).subscribe({
-      next: history => {
-        // Store all periods so the charts can show trends over time.
-        this.history = history;
-      },
-      error: error => console.error('Failed to load company history.', error)
-    });
+  private loadFinancialPeriod(request: PeriodRequest): Observable<unknown> {
+    return this.companyService
+      .getFinancialPeriod(request.companyId, request.period, request.compareTo)
+      .pipe(
+        tap(financialPeriod => (this.financialPeriod = financialPeriod)),
+        catchError(error => {
+          this.financialPeriod = null;
+          this.errorMessage = errorMessage(error, 'Failed to load the financial period.');
+          return EMPTY;
+        }),
+        finalize(() => (this.isLoadingPeriod = false))
+      );
   }
 }

@@ -1,3 +1,5 @@
+import { ReportValidationError } from "./errors";
+
 export const REPORT_TYPES = [
     "Annual Report",
     "Interim Report",
@@ -38,7 +40,7 @@ export interface FinancialReport {
     periods: FinancialPeriod[];
 }
 
-const PERIOD_PATTERN = /^(?:FY\d{4}|(?:Q[1-4]|H[12]|YTD|M(?:3|6|9|12))_\d{4})$/;
+export const PERIOD_PATTERN = /^(?:FY\d{4}|(?:Q[1-4]|H[12]|YTD|M(?:3|6|9|12))_\d{4})$/;
 const METRIC_KEYS = [
     "revenue",
     "grossProfit",
@@ -63,13 +65,13 @@ function requiredString(
     maxLength: number
 ): string {
     if (typeof value !== "string" || !value.trim()) {
-        throw new Error(`The extracted ${field} is missing.`);
+        throw new ReportValidationError(`The extracted ${field} is missing.`);
     }
 
     const trimmed = value.trim();
 
     if (trimmed.length > maxLength) {
-        throw new Error(`The extracted ${field} is too long.`);
+        throw new ReportValidationError(`The extracted ${field} is too long.`);
     }
 
     return trimmed;
@@ -82,13 +84,13 @@ function nullableString(
 ): string | null {
     if (value === null) return null;
     if (typeof value !== "string") {
-        throw new Error(`The extracted ${field} is invalid.`);
+        throw new ReportValidationError(`The extracted ${field} is invalid.`);
     }
 
     const trimmed = value.trim();
     if (!trimmed) return null;
     if (trimmed.length > maxLength) {
-        throw new Error(`The extracted ${field} is too long.`);
+        throw new ReportValidationError(`The extracted ${field} is too long.`);
     }
 
     return trimmed;
@@ -99,12 +101,12 @@ function nullableDate(value: unknown, field: string): string | null {
     if (date === null) return null;
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        throw new Error(`The extracted ${field} must use YYYY-MM-DD.`);
+        throw new ReportValidationError(`The extracted ${field} must use YYYY-MM-DD.`);
     }
 
     const parsed = new Date(`${date}T00:00:00.000Z`);
     if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
-        throw new Error(`The extracted ${field} is not a real date.`);
+        throw new ReportValidationError(`The extracted ${field} is not a real date.`);
     }
 
     return date;
@@ -113,13 +115,16 @@ function nullableDate(value: unknown, field: string): string | null {
 function nullableMetric(value: unknown, field: MetricKey): number | null {
     if (value === null) return null;
     if (typeof value !== "number" || !Number.isFinite(value)) {
-        throw new Error(`The extracted metric ${field} is invalid.`);
+        throw new ReportValidationError(`The extracted metric ${field} is invalid.`);
     }
     if (Math.abs(value) > 1e18) {
-        throw new Error(`The extracted metric ${field} is outside the supported range.`);
+        throw new ReportValidationError(`The extracted metric ${field} is outside the supported range.`);
     }
     if (field === "customers" && value < 0) {
-        throw new Error("The extracted customer count cannot be negative.");
+        throw new ReportValidationError("The extracted customer count cannot be negative.");
+    }
+    if (field === "customers" && !Number.isInteger(value)) {
+        throw new ReportValidationError("The extracted customer count must be a whole number.");
     }
 
     return value;
@@ -127,12 +132,12 @@ function nullableMetric(value: unknown, field: MetricKey): number | null {
 
 function validatePeriod(value: unknown, index: number): FinancialPeriod {
     if (!isRecord(value)) {
-        throw new Error(`Financial period ${index + 1} is invalid.`);
+        throw new ReportValidationError(`Financial period ${index + 1} is invalid.`);
     }
 
     const period = requiredString(value.period, "period", 32);
     if (!PERIOD_PATTERN.test(period)) {
-        throw new Error(`The extracted period '${period}' has an unsupported format.`);
+        throw new ReportValidationError(`The extracted period '${period}' has an unsupported format.`);
     }
 
     const result: FinancialPeriod = {
@@ -163,34 +168,34 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
     try {
         parsed = JSON.parse(aiResponse);
     } catch {
-        throw new Error("The analysis service returned invalid JSON.");
+        throw new ReportValidationError("The analysis service returned invalid JSON.");
     }
 
     if (!isRecord(parsed)) {
-        throw new Error("The analysis service returned an invalid report.");
+        throw new ReportValidationError("The analysis service returned an invalid report.");
     }
 
     const reportType = requiredString(parsed.reportType, "report type", 80);
     if (!REPORT_TYPES.includes(reportType as ReportType)) {
-        throw new Error(`The extracted report type '${reportType}' is unsupported.`);
+        throw new ReportValidationError(`The extracted report type '${reportType}' is unsupported.`);
     }
 
     const currency = nullableString(parsed.currency, "currency", 3);
     if (currency !== null && !/^[A-Z]{3}$/.test(currency)) {
-        throw new Error("The extracted currency must be a three-letter uppercase code.");
+        throw new ReportValidationError("The extracted currency must be a three-letter uppercase code.");
     }
 
     if (!Array.isArray(parsed.periods) || parsed.periods.length === 0) {
-        throw new Error("No financial reporting periods were found in the uploaded PDF.");
+        throw new ReportValidationError("No financial reporting periods were found in the uploaded PDF.");
     }
     if (parsed.periods.length > 40) {
-        throw new Error("The document contains too many reporting periods.");
+        throw new ReportValidationError("The document contains too many reporting periods.");
     }
 
     const periods = parsed.periods.map(validatePeriod);
     const uniquePeriods = new Set(periods.map(period => period.period));
     if (uniquePeriods.size !== periods.length) {
-        throw new Error("The analysis returned duplicate reporting periods.");
+        throw new ReportValidationError("The analysis returned duplicate reporting periods.");
     }
 
     return {

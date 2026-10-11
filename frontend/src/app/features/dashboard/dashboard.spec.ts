@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { Dashboard } from './dashboard';
@@ -131,7 +131,7 @@ describe('Dashboard', () => {
     });
 
     expect(companyService.getFinancialPeriod)
-      .toHaveBeenCalledWith(1, 'FY2025');
+      .toHaveBeenCalledWith(1, 'FY2025', undefined);
 
     expect(component.financialPeriod).toBe(financialPeriod);
   });
@@ -161,5 +161,34 @@ describe('Dashboard', () => {
 
     expect(companyService.getFinancialPeriod)
       .toHaveBeenCalledWith(1, 'FY2025', 'FY2024');
+  });
+
+  it('should ignore a stale period response after a newer selection', () => {
+    const slow = new Subject<any>();
+    const fast = { financials: { period: 'FY2024' } } as any;
+
+    component.selectedCompany = { label: 'Senus PLC', value: 1 };
+
+    companyService.getFinancialPeriod.mockReturnValueOnce(slow);
+    component.onPeriodSelected({ label: 'FY2025', value: 'FY2025' });
+
+    companyService.getFinancialPeriod.mockReturnValueOnce(of(fast));
+    component.onPeriodSelected({ label: 'FY2024', value: 'FY2024' });
+
+    // The earlier, slower request finishes last but must not win.
+    slow.next({ financials: { period: 'FY2025' } });
+
+    expect(component.financialPeriod).toBe(fast);
+  });
+
+  it('should show an error message when companies fail to load', () => {
+    const failing = new Subject<never>();
+    companyService.getCompanies.mockReturnValue(failing);
+
+    component.ngOnInit();
+    failing.error(new Error('offline'));
+
+    expect(component.errorMessage).toBe('Failed to load companies.');
+    expect(component.isLoadingCompanies).toBe(false);
   });
 });

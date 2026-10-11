@@ -17,17 +17,17 @@ export interface FinancialPeriod {
         companyName: string;
         period: string;
         periodLabel: string;
-        periodEnd: string;
+        periodEnd: string | null;
 
-        revenue: number;
-        grossProfit: number;
-        operatingProfit: number;
-        ebitda: number;
-        netProfit: number;
-        cash: number;
-        debt: number;
-        customers: number;
-        netAssets: number;
+        revenue: number | null;
+        grossProfit: number | null;
+        operatingProfit: number | null;
+        ebitda: number | null;
+        netProfit: number | null;
+        cash: number | null;
+        debt: number | null;
+        customers: number | null;
+        netAssets: number | null;
     };
 
     metrics: {

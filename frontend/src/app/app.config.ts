@@ -4,7 +4,9 @@ import {
   provideZoneChangeDetection
 } from '@angular/core';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+
+import { apiErrorInterceptor } from './core/interceptors/api-error.interceptor';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -17,7 +19,7 @@ export const appConfig: ApplicationConfig = {
       eventCoalescing: true
     }),
 
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([apiErrorInterceptor])),
 
     provideRouter(routes)
   ]

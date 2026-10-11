@@ -360,3 +360,23 @@
     }
   }
 }
+.dashboard-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid #b91c1c;
+  border-radius: 8px;
+  color: #fecaca;
+  background: rgba(185, 28, 28, 0.15);
+}
+
+.dashboard-error button {
+  cursor: pointer;
+}
+
+.dashboard-status {
+  opacity: 0.8;
+}
