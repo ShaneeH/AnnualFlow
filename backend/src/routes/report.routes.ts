@@ -29,6 +29,7 @@ import {
 } from "../utils/pdf-upload";
 import { ProcessingIndicator } from "../utils/processing-indicator";
 import { analysePrompt } from "../utils/prompts";
+import { AppError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
 import { parseAndValidateReport } from "../utils/report-validator";
 
 const router = Router();
@@ -297,7 +298,7 @@ router.post(
 
             progress.update("Validating and saving results");
             const report = parseAndValidateReport(aiResponse);
-            const documentId = await saveFinancialDocument(
+            const { documentId, conflicts } = await saveFinancialDocument(
                 documentHash,
                 uploadedPdfId,
                 report
@@ -311,7 +312,8 @@ router.post(
                 documentId,
                 uploadedPdfId,
                 documentHash,
-                report
+                report,
+                conflicts
             });
         } catch (error) {
             progress.fail("Document processing failed");
@@ -327,20 +329,22 @@ router.post(
                 return sendError(res, error.status, error.message);
             }
 
+            const appError = error instanceof AppError
+                ? error
+                : toUpstreamAppError(error);
+
+            if (appError && appError.status < 500) {
+                return sendError(res, appError.status, appError.message);
+            }
+
             logRouteError(res, "processing failed", error);
 
-            if (
-                error instanceof Error &&
-                error.message === "OPENAI_API_KEY is not configured."
-            ) {
+            if (error instanceof ServiceConfigError) {
                 return sendError(res, 503, "The document analysis service is not configured.");
             }
 
-            if (
-                error instanceof Error &&
-                /extracted|reporting periods|analysis service/i.test(error.message)
-            ) {
-                return sendError(res, 422, error.message);
+            if (appError) {
+                return sendError(res, appError.status, appError.message);
             }
 
             return sendError(

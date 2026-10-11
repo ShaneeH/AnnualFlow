@@ -42,6 +42,23 @@ export interface FinancialDocumentRecord {
     periods: DocumentPeriodRecord[];
 }
 
+/**
+ * A figure that an upload changed on a period that already existed.
+ * The new value is still written (current merge behaviour); this record
+ * makes the overwrite visible to the caller instead of silent.
+ */
+export interface PeriodConflict {
+    period: string;
+    field: string;
+    previousValue: number | string | null;
+    newValue: number | string | null;
+}
+
+export interface SavedDocumentResult {
+    documentId: number;
+    conflicts: PeriodConflict[];
+}
+
 export interface DocumentListOptions {
     companyId?: number;
     limit?: number;
@@ -123,8 +140,9 @@ export async function saveFinancialDocument(
     documentHash: string,
     openaiFileId: string,
     report: FinancialReport
-): Promise<number> {
+): Promise<SavedDocumentResult> {
     const client = await pool.connect();
+    const conflicts: PeriodConflict[] = [];
 
     try {
         await client.query("BEGIN");
@@ -155,7 +173,8 @@ export async function saveFinancialDocument(
             const periodId = await upsertFinancialPeriod(
                 client,
                 companyId,
-                period
+                period,
+                conflicts
             );
 
             await linkDocumentToPeriod(
@@ -167,7 +186,7 @@ export async function saveFinancialDocument(
 
         await client.query("COMMIT");
 
-        return documentId;
+        return { documentId, conflicts };
     } catch (error) {
         await client.query("ROLLBACK");
 
@@ -492,13 +511,20 @@ async function insertDocument(
 async function upsertFinancialPeriod(
     client: PoolClient,
     companyId: number,
-    period: FinancialPeriod
+    period: FinancialPeriod,
+    conflicts: PeriodConflict[]
 ): Promise<number> {
     const existing = await client.query<{
         period_id: number;
-    }>(
+        period_end: string | null;
+        period_label: string | null;
+    } & Record<PeriodMetricColumn, number | string | null>>(
         `
-        SELECT period_id
+        SELECT
+            period_id,
+            period_end,
+            period_label,
+            ${PERIOD_METRIC_COLUMNS.map(([, column]) => column).join(",\n            ")}
         FROM financial_periods
         WHERE company_id = $1
           AND period = $2
@@ -513,7 +539,10 @@ async function upsertFinancialPeriod(
     );
 
     if (existing.rows[0]) {
-        const periodId = existing.rows[0].period_id;
+        const row = existing.rows[0];
+        const periodId = row.period_id;
+
+        conflicts.push(...findPeriodConflicts(row, period));
 
         await client.query(
             `
@@ -639,6 +668,69 @@ async function upsertFinancialPeriod(
     );
 
     return inserted.rows[0].period_id;
+}
+
+const PERIOD_METRIC_COLUMNS = [
+    ["revenue", "revenue"],
+    ["grossProfit", "gross_profit"],
+    ["operatingProfit", "operating_profit"],
+    ["ebitda", "ebitda"],
+    ["netProfit", "net_profit"],
+    ["cash", "cash"],
+    ["debt", "debt"],
+    ["customers", "customers"],
+    ["netAssets", "net_assets"]
+] as const;
+
+type PeriodMetricColumn = typeof PERIOD_METRIC_COLUMNS[number][1];
+
+function sameValue(
+    previous: number | string | null,
+    next: number | string | null
+): boolean {
+    if (typeof previous === "number" || typeof next === "number") {
+        return Number(previous) === Number(next);
+    }
+
+    return String(previous) === String(next);
+}
+
+/**
+ * Lists fields where a non-null incoming value differs from a non-null stored
+ * value. Null incoming values never overwrite (COALESCE), so they are ignored.
+ */
+export function findPeriodConflicts(
+    existing: {
+        period_end: string | null;
+        period_label: string | null;
+    } & Record<PeriodMetricColumn, number | string | null>,
+    period: FinancialPeriod
+): PeriodConflict[] {
+    const conflicts: PeriodConflict[] = [];
+    const candidates: Array<[string, number | string | null, number | string | null]> = [
+        ["periodEnd", existing.period_end, period.periodEnd],
+        ["periodLabel", existing.period_label, period.periodLabel],
+        ...PERIOD_METRIC_COLUMNS.map(([field, column]) =>
+            [field, existing[column], period[field]] as [string, number | string | null, number | null]
+        )
+    ];
+
+    for (const [field, previousValue, newValue] of candidates) {
+        if (
+            previousValue !== null &&
+            newValue !== null &&
+            !sameValue(previousValue, newValue)
+        ) {
+            conflicts.push({
+                period: period.period,
+                field,
+                previousValue,
+                newValue
+            });
+        }
+    }
+
+    return conflicts;
 }
 
 async function linkDocumentToPeriod(

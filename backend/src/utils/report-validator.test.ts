@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { ReportValidationError } from "./errors";
 import { parseAndValidateReport } from "./report-validator";
 
 function validReport(overrides: Record<string, unknown> = {}): string {
@@ -70,3 +71,16 @@ test("rejects invalid dates and currency codes", () => {
     );
 });
 
+
+test("rejects fractional customer counts as a validation error", () => {
+    const report = JSON.parse(validReport());
+    report.periods[0].customers = 42.5;
+
+    assert.throws(
+        () => parseAndValidateReport(JSON.stringify(report)),
+        (error: unknown) =>
+            error instanceof ReportValidationError &&
+            error.status === 422 &&
+            /whole number/.test(error.message)
+    );
+});

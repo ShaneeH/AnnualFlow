@@ -1,4 +1,6 @@
 import { Router, Request, Response } from "express";
+import { AppError } from "../utils/errors";
+import { PERIOD_PATTERN } from "../utils/report-validator";
 import { getCompanies,getCompanyPeriods,getFinancialPeriod,getCompanyHistory} from "../services/companies.service";
 
 const router = Router();
@@ -40,13 +42,9 @@ function getComparePeriod(req: Request): string | undefined {
         : undefined;
 }
 
-// Period names can contain values such as FY2025, 2025_Q1 or 2025_Q2.
+// Periods share the validator's format, e.g. FY2025, Q1_2025, H1_2025.
 function isValidPeriod(period: string): boolean {
-    return (
-        period.length > 0 &&
-        period.length <= MAX_PERIOD_LENGTH &&
-        /^[A-Za-z0-9_-]+$/.test(period)
-    );
+    return period.length <= MAX_PERIOD_LENGTH && PERIOD_PATTERN.test(period);
 }
 
 
@@ -67,11 +65,9 @@ function sendError(
 
 // Converts unexpected errors into a clean API response.
 function handleError(res: Response, error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-
-    // Service errors containing "not found" should return a 404.
-    if (/not found/i.test(message)) {
-        return sendError(res, 404, message);
+    // Known service errors (such as NotFoundError) carry their own status.
+    if (error instanceof AppError && error.status < 500) {
+        return sendError(res, error.status, error.message);
     }
 
     console.error(

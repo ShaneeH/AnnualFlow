@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 
+import { AnalysisServiceError, ServiceConfigError } from "../utils/errors";
 import { financialReportSchema } from "../utils/report-schema";
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-5";
@@ -12,7 +13,7 @@ function getClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured.");
+    throw new ServiceConfigError("OPENAI_API_KEY is not configured.");
   }
 
   client ??= new OpenAI({
@@ -85,7 +86,7 @@ export async function analysePDF(
   });
 
   if (!response.output_text) {
-    throw new Error("The analysis service returned an empty response.");
+    throw new AnalysisServiceError("The analysis service returned an empty response.");
   }
 
   return response.output_text;

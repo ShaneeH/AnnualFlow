@@ -1,3 +1,4 @@
+import { NotFoundError } from "../utils/errors";
 import { db } from "../database/db";
 import { calculateFinancialMetrics } from "./financial-metrics.service";
 import { compareFinancialPeriods } from "./comparison.service";
@@ -31,17 +32,13 @@ export async function getCompanyPeriods(
             period_end AS "periodEnd"
         FROM financial_periods
         WHERE company_id = $1
-        ORDER BY period_end DESC;
+        ORDER BY period_end DESC NULLS LAST, period;
         `,
         [companyId]
     );
 
-    if (result.rowCount === 0) {
-        throw new Error(
-            `Company not found in the DB with ID ${companyId}.`
-        );
-    }
-
+    // An empty list means the company is unknown or has no periods;
+    // the route decides how to respond.
     return result.rows;
 
 }
@@ -92,9 +89,7 @@ export async function getFinancialPeriod(
     );
 
     if (result.rowCount === 0) {
-        throw new Error(
-            `Financial period '${period}' not found for company ${companyId}.`
-        );
+        return null;
     }
 
     const currentPeriod = result.rows[0];
@@ -147,7 +142,7 @@ export async function getFinancialPeriod(
     );
 
     if (comparisonResult.rowCount === 0) {
-        throw new Error(
+        throw new NotFoundError(
             `Comparison period '${compareTo}' not found for company ${companyId}.`
         );
     }
@@ -199,7 +194,7 @@ export async function getCompanyHistory(
 
         WHERE company_id = $1
 
-        ORDER BY period_end ASC;
+        ORDER BY period_end ASC NULLS LAST, period;
         `,
         [companyId]
     );
