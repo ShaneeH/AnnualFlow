@@ -4,7 +4,7 @@ export interface HistoryPeriod {
 
     periodLabel: string;
 
-    periodEnd: string;
+    periodEnd: string | null;
 
     revenue: number | null;
 

@@ -41,7 +41,7 @@ export class CompanyService {
     }
 
     return this.http.get<FinancialPeriod>(
-      `${environment.apiUrl}/companies/${companyId}/periods/${period}`,
+      `${environment.apiUrl}/companies/${companyId}/periods/${encodeURIComponent(period)}`,
       { params }
     );
   }

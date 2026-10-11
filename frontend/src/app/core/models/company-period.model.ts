@@ -6,6 +6,6 @@ export interface CompanyPeriod {
 
     periodLabel: string;
 
-    periodEnd: string;
+    periodEnd: string | null;
 
 }
