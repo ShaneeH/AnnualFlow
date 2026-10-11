@@ -27,6 +27,10 @@ export interface DocumentPeriodRecord {
     debt: number | string | null;
     customers: number | string | null;
     netAssets: number | string | null;
+    operatingCashFlow: number | string | null;
+    totalAssets: number | string | null;
+    totalLiabilities: number | string | null;
+    eps: number | string | null;
 }
 
 export interface FinancialDocumentRecord {
@@ -97,7 +101,11 @@ const DOCUMENT_SELECT = `
                     'cash', fp.cash,
                     'debt', fp.debt,
                     'customers', fp.customers,
-                    'netAssets', fp.net_assets
+                    'netAssets', fp.net_assets,
+                    'operatingCashFlow', fp.operating_cash_flow,
+                    'totalAssets', fp.total_assets,
+                    'totalLiabilities', fp.total_liabilities,
+                    'eps', fp.eps
                 )
                 ORDER BY fp.period_end DESC NULLS LAST, fp.period_id DESC
             ) FILTER (WHERE fp.period_id IS NOT NULL),
@@ -592,6 +600,22 @@ async function upsertFinancialPeriod(
                     $12,
                     net_assets
                 ),
+                operating_cash_flow = COALESCE(
+                    $13,
+                    operating_cash_flow
+                ),
+                total_assets = COALESCE(
+                    $14,
+                    total_assets
+                ),
+                total_liabilities = COALESCE(
+                    $15,
+                    total_liabilities
+                ),
+                eps = COALESCE(
+                    $16,
+                    eps
+                ),
                 updated_at = CURRENT_TIMESTAMP
             WHERE period_id = $1;
             `,
@@ -607,7 +631,11 @@ async function upsertFinancialPeriod(
                 period.cash,
                 period.debt,
                 period.customers,
-                period.netAssets
+                period.netAssets,
+                period.operatingCashFlow,
+                period.totalAssets,
+                period.totalLiabilities,
+                period.eps
             ]
         );
 
@@ -631,7 +659,11 @@ async function upsertFinancialPeriod(
             cash,
             debt,
             customers,
-            net_assets
+            net_assets,
+            operating_cash_flow,
+            total_assets,
+            total_liabilities,
+            eps
         )
         VALUES (
             $1,
@@ -646,7 +678,11 @@ async function upsertFinancialPeriod(
             $10,
             $11,
             $12,
-            $13
+            $13,
+            $14,
+            $15,
+            $16,
+            $17
         )
         RETURNING period_id;
         `,
@@ -663,7 +699,11 @@ async function upsertFinancialPeriod(
             period.cash,
             period.debt,
             period.customers,
-            period.netAssets
+            period.netAssets,
+            period.operatingCashFlow,
+            period.totalAssets,
+            period.totalLiabilities,
+            period.eps
         ]
     );
 
@@ -679,7 +719,11 @@ const PERIOD_METRIC_COLUMNS = [
     ["cash", "cash"],
     ["debt", "debt"],
     ["customers", "customers"],
-    ["netAssets", "net_assets"]
+    ["netAssets", "net_assets"],
+    ["operatingCashFlow", "operating_cash_flow"],
+    ["totalAssets", "total_assets"],
+    ["totalLiabilities", "total_liabilities"],
+    ["eps", "eps"]
 ] as const;
 
 type PeriodMetricColumn = typeof PERIOD_METRIC_COLUMNS[number][1];

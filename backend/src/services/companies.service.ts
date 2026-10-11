@@ -1,6 +1,6 @@
 import { NotFoundError } from "../utils/errors";
 import { db } from "../database/db";
-import { calculateFinancialMetrics } from "./financial-metrics.service";
+import { calculateFinancialMetrics, calculateMargins } from "./financial-metrics.service";
 import { compareFinancialPeriods } from "./comparison.service";
 
 export async function getCompanies() {
@@ -68,7 +68,11 @@ export async function getFinancialPeriod(
             fp.cash,
             fp.debt,
             fp.customers,
-            fp.net_assets AS "netAssets"
+            fp.net_assets AS "netAssets",
+            fp.operating_cash_flow AS "operatingCashFlow",
+            fp.total_assets AS "totalAssets",
+            fp.total_liabilities AS "totalLiabilities",
+            fp.eps AS "eps"
 
         FROM companies c
 
@@ -124,7 +128,11 @@ export async function getFinancialPeriod(
             cash,
             debt,
             customers,
-            net_assets AS "netAssets"
+            net_assets AS "netAssets",
+            operating_cash_flow AS "operatingCashFlow",
+            total_assets AS "totalAssets",
+            total_liabilities AS "totalLiabilities",
+            eps AS "eps"
 
         FROM financial_periods
 
@@ -188,7 +196,11 @@ export async function getCompanyHistory(
             cash,
             debt,
             customers,
-            net_assets AS "netAssets"
+            net_assets AS "netAssets",
+            operating_cash_flow AS "operatingCashFlow",
+            total_assets AS "totalAssets",
+            total_liabilities AS "totalLiabilities",
+            eps AS "eps"
 
         FROM financial_periods
 
@@ -199,6 +211,10 @@ export async function getCompanyHistory(
         [companyId]
     );
 
-    return result.rows;
+    // Attach deterministic margins so the frontend can chart them directly.
+    return result.rows.map(row => ({
+        ...row,
+        ...calculateMargins(row)
+    }));
 
 }
