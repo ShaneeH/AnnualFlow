@@ -3,12 +3,10 @@ import multer from "multer";
 
 import {
     deleteFinancialDocument,
-    documentExistsByHash,
     DuplicateDocumentError,
     getDocumentById,
     getDocuments,
-    getDocumentStats,
-    saveFinancialDocument
+    getDocumentStats
 } from "../services/documents.service";
 import {
     createReportCsv,
@@ -16,12 +14,15 @@ import {
     createReportPdf,
     getReportExportFilename
 } from "../services/report-export.service";
-import { deletePDF, analysePDF, uploadPDF } from "../services/openai.service";
+import { deletePDF } from "../services/openai.service";
+import {
+    defaultReportProcessingDeps,
+    processReportUpload
+} from "../services/report-processing.service";
 import {
     exportLimiter,
     uploadLimiter
 } from "../middleware/rate-limit";
-import { generateDocumentHash } from "../utils/document-hash";
 import {
     maxPdfBytes,
     PdfUploadError,
@@ -29,7 +30,12 @@ import {
 } from "../utils/pdf-upload";
 import { ProcessingIndicator } from "../utils/processing-indicator";
 import { analysePrompt } from "../utils/prompts";
-import { AppError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
+import {
+    AppError,
+    NotFinancialReportError,
+    ServiceConfigError,
+    toUpstreamAppError
+} from "../utils/errors";
 import { parseAndValidateReport } from "../utils/report-validator";
 
 const router = Router();
@@ -272,7 +278,6 @@ router.post(
         const progress = new ProcessingIndicator(
             String(res.locals.requestId ?? "unknown")
         );
-        let uploadedPdfId: string | null = null;
 
         try {
             if (!req.file) {
@@ -282,45 +287,22 @@ router.post(
             progress.start("Validating PDF");
             validatePdfUpload(req.file);
 
-            const pdf = req.file.buffer;
-            const documentHash = generateDocumentHash(pdf);
-
-            progress.update("Checking for duplicates");
-            if (await documentExistsByHash(documentHash)) {
-                throw new DuplicateDocumentError();
-            }
-
-            progress.update("Uploading secure working copy");
-            uploadedPdfId = await uploadPDF(pdf, req.file.originalname);
-
-            progress.update("Extracting financial periods");
-            const aiResponse = await analysePDF(uploadedPdfId, analysePrompt);
-
-            progress.update("Validating and saving results");
-            const report = parseAndValidateReport(aiResponse);
-            const { documentId, conflicts } = await saveFinancialDocument(
-                documentHash,
-                uploadedPdfId,
-                report
+            const result = await processReportUpload(
+                req.file.buffer,
+                req.file.originalname,
+                defaultReportProcessingDeps,
+                stage => progress.update(stage)
             );
 
-            progress.succeed(`Saved ${report.reportName}`);
+            progress.succeed(`Saved ${result.report.reportName}`);
 
             return res.status(201).json({
                 success: true,
                 message: "The PDF was successfully uploaded and analysed.",
-                documentId,
-                uploadedPdfId,
-                documentHash,
-                report,
-                conflicts
+                ...result
             });
         } catch (error) {
             progress.fail("Document processing failed");
-
-            if (uploadedPdfId) {
-                await deletePDF(uploadedPdfId);
-            }
 
             if (error instanceof DuplicateDocumentError) {
                 return sendError(res, 409, error.message);
@@ -332,6 +314,15 @@ router.post(
             const appError = error instanceof AppError
                 ? error
                 : toUpstreamAppError(error);
+
+            if (error instanceof NotFinancialReportError) {
+                return res.status(422).json({
+                    success: false,
+                    error: error.message,
+                    code: "NOT_FINANCIAL_REPORT",
+                    requestId: res.locals.requestId
+                });
+            }
 
             if (appError && appError.status < 500) {
                 return sendError(res, appError.status, appError.message);

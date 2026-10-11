@@ -1,4 +1,4 @@
-import { REPORT_TYPES } from "./report-validator";
+import { DOCUMENT_TYPES, REPORT_TYPES } from "./report-validator";
 
 const nullableNumber = { type: ["number", "null"] };
 const nullableDate = {
@@ -12,6 +12,7 @@ export const financialReportSchema = {
     type: "object",
     additionalProperties: false,
     required: [
+        "classification",
         "company",
         "reportName",
         "reportType",
@@ -21,6 +22,17 @@ export const financialReportSchema = {
         "periods"
     ],
     properties: {
+        classification: {
+            type: "object",
+            additionalProperties: false,
+            required: ["isFinancialReport", "documentType", "confidence", "reason"],
+            properties: {
+                isFinancialReport: { type: "boolean" },
+                documentType: { type: "string", enum: [...DOCUMENT_TYPES] },
+                confidence: { type: "number" },
+                reason: { type: "string" }
+            }
+        },
         company: { type: "string" },
         reportName: { type: "string" },
         reportType: { type: "string", enum: [...REPORT_TYPES] },
@@ -34,7 +46,7 @@ export const financialReportSchema = {
         source: { type: ["string", "null"] },
         periods: {
             type: "array",
-            minItems: 1,
+            minItems: 0,
             maxItems: 40,
             items: {
                 type: "object",
@@ -51,7 +63,11 @@ export const financialReportSchema = {
                     "cash",
                     "debt",
                     "customers",
-                    "netAssets"
+                    "netAssets",
+                    "operatingCashFlow",
+                    "totalAssets",
+                    "totalLiabilities",
+                    "eps"
                 ],
                 properties: {
                     period: {
@@ -68,7 +84,11 @@ export const financialReportSchema = {
                     cash: nullableNumber,
                     debt: nullableNumber,
                     customers: nullableNumber,
-                    netAssets: nullableNumber
+                    netAssets: nullableNumber,
+                    operatingCashFlow: nullableNumber,
+                    totalAssets: nullableNumber,
+                    totalLiabilities: nullableNumber,
+                    eps: nullableNumber
                 }
             }
         }

@@ -21,6 +21,16 @@ export class ReportValidationError extends AppError {
     }
 }
 
+/**
+ * The uploaded document is not a financial report (e.g. a CV, invoice or
+ * letter). Nothing may be written to the database for it.
+ */
+export class NotFinancialReportError extends ReportValidationError {
+    constructor(message: string) {
+        super(message);
+    }
+}
+
 /** A required server-side setting (such as OPENAI_API_KEY) is missing. */
 export class ServiceConfigError extends AppError {
     constructor(message: string) {

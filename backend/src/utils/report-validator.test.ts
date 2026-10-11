@@ -6,6 +6,12 @@ import { parseAndValidateReport } from "./report-validator";
 
 function validReport(overrides: Record<string, unknown> = {}): string {
     return JSON.stringify({
+        classification: {
+            isFinancialReport: true,
+            documentType: "Financial Report",
+            confidence: 0.97,
+            reason: "Annual report with a consolidated income statement."
+        },
         company: "Example plc",
         reportName: "Annual Report 2025",
         reportType: "Annual Report",
@@ -24,7 +30,11 @@ function validReport(overrides: Record<string, unknown> = {}): string {
             cash: 300,
             debt: 50,
             customers: 42,
-            netAssets: 700
+            netAssets: 700,
+            operatingCashFlow: null,
+            totalAssets: null,
+            totalLiabilities: null,
+            eps: null
         }],
         ...overrides
     });
