@@ -1,0 +1,111 @@
+<button
+  type="button"
+  class="robot-button"
+  aria-label="AI Insight"
+  title="AI Insight"
+  [attr.aria-expanded]="isOpen"
+  aria-controls="ai-insight-panel"
+  (click)="open()"
+>
+  <svg class="robot-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+    <line x1="24" y1="5" x2="24" y2="11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+    <circle class="robot-antenna" cx="24" cy="5" r="3" />
+    <rect x="9" y="11" width="30" height="24" rx="9" fill="none" stroke="currentColor" stroke-width="2.5" />
+    <rect x="4" y="19" width="4" height="9" rx="2" fill="currentColor" />
+    <rect x="40" y="19" width="4" height="9" rx="2" fill="currentColor" />
+    <circle class="robot-eye" cx="18" cy="22" r="3.2" />
+    <circle class="robot-eye" cx="30" cy="22" r="3.2" />
+    <path d="M18 29 Q24 33 30 29" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" />
+    <path d="M16 39 h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+  </svg>
+  <span class="robot-label">AI Insight</span>
+</button>
+
+@if (isOpen) {
+  <div class="insight-backdrop" (click)="close()" aria-hidden="true"></div>
+
+  <aside
+    id="ai-insight-panel"
+    class="insight-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ai-insight-title"
+  >
+    <header class="panel-header">
+      <div>
+        <span class="panel-eyebrow">AI Insight</span>
+        <h2 id="ai-insight-title">{{ companyName() || 'Company' }}</h2>
+        @if (periodLabel()) {
+          <p class="panel-period">{{ periodLabel() }}</p>
+        }
+      </div>
+      <button type="button" class="close-button" aria-label="Close AI Insight" (click)="close()">×</button>
+    </header>
+
+    <div class="panel-body" aria-live="polite">
+      @switch (state) {
+        @case ('loading') {
+          <p class="panel-status">Loading…</p>
+        }
+
+        @case ('thinking') {
+          <div class="thinking" role="status">
+            <div class="thinking-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p>Analysing the numbers…</p>
+            <div class="skeleton"></div>
+            <div class="skeleton short"></div>
+            <div class="skeleton"></div>
+          </div>
+        }
+
+        @case ('empty') {
+          <div class="empty-state">
+            <p>No insight has been generated for this period yet.</p>
+            <p class="muted">The AI explains this report's KPIs, margins and changes versus the previous period.</p>
+            <button type="button" class="primary-button" (click)="generate()">Generate insight</button>
+          </div>
+        }
+
+        @case ('error') {
+          <div class="error-state" role="alert">
+            <p>{{ errorMessage }}</p>
+            <button type="button" class="primary-button" (click)="load()">Try again</button>
+          </div>
+        }
+
+        @case ('ready') {
+          @if (insight) {
+            <section class="insight-card summary-card">
+              <h3><span aria-hidden="true">✨</span> Performance summary</h3>
+              <p>{{ insight.content.performanceSummary }}</p>
+            </section>
+
+            @for (section of sections; track section.key) {
+              @if (insight.content[section.key].length) {
+                <section class="insight-card">
+                  <h3><span aria-hidden="true">{{ section.icon }}</span> {{ section.title }}</h3>
+                  <ul>
+                    @for (point of insight.content[section.key]; track $index) {
+                      <li>{{ point }}</li>
+                    }
+                  </ul>
+                </section>
+              }
+            }
+
+            <p class="generated-meta">
+              Generated {{ insight.generatedAt | date: 'medium' }} · {{ insight.model }}
+            </p>
+          }
+        }
+      }
+    </div>
+
+    <footer class="panel-footer">
+      <p class="disclaimer">AI-generated, not financial advice. External factors are plausible influences, not confirmed causes.</p>
+      @if (state === 'ready') {
+        <button type="button" class="secondary-button" (click)="generate(true)">↻ Regenerate</button>
+      }
+    </footer>
+  </aside>
+}

@@ -239,4 +239,21 @@ describe('Dashboard', () => {
     expect(component.showMarginsChart).toBe(true);
     expect(component.showCustomerChart).toBe(false);
   });
+
+  it('should show the AI Insight robot only once a period is selected', () => {
+    const robot = () => fixture.nativeElement.querySelector('button[aria-label="AI Insight"]');
+    expect(robot()).toBeNull();
+
+    companyService.getFinancialPeriod.mockReturnValue(of({
+      financials: { companyName: 'Senus PLC', periodLabel: 'FY 2025', revenue: 100 },
+      metrics: {}
+    }));
+    component.selectedCompany = { label: 'Senus PLC', value: 1 };
+    component.emptyData = false;
+    component.companies = [{ label: 'Senus PLC', value: 1 }];
+    component.onPeriodSelected({ label: 'FY 2025', value: 'FY2025' });
+    fixture.detectChanges();
+
+    expect(robot()).toBeTruthy();
+  });
 });

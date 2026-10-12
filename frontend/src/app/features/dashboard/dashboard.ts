@@ -12,6 +12,7 @@ import { HistoryPeriod } from '../../core/models/history-period.model';
 import { CustomerChartComponent } from '../../shared/components/customer-chart/customer-chart';
 import { DropdownOption, DropdownSelectComponent } from '../../shared/components/dropdown-selector/dropdown-selector';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card';
+import { AiInsightComponent } from '../../shared/components/ai-insight/ai-insight';
 import { MarginsChartComponent } from '../../shared/components/margins-chart/margins-chart';
 import { hasSeries, isPresent } from '../../shared/utils/chart-data';
 import { RevenueChartComponent } from '../../shared/components/revenue-chart/revenue-chart';
@@ -95,7 +96,8 @@ interface PeriodRequest {
     KpiCardComponent,
     RevenueChartComponent,
     CustomerChartComponent,
-    MarginsChartComponent
+    MarginsChartComponent,
+    AiInsightComponent
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'

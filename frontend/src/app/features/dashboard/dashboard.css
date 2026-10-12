@@ -385,3 +385,10 @@
 .dashboard-status {
   opacity: 0.8;
 }
+
+.report-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}

@@ -78,6 +78,17 @@
           </div>
         </div>
 
+        <div class="report-header-actions">
+          @if (selectedCompany && selectedPeriod) {
+            <app-ai-insight
+              [companyId]="selectedCompany.value"
+              [period]="selectedPeriod.value"
+              [companyName]="financialPeriod.financials.companyName"
+              [periodLabel]="financialPeriod.financials.periodLabel"
+            />
+          }
+        </div>
+
         @if (selectedComparePeriod) {
           <div class="compare-pill">
             <span class="report-label">vs</span>
