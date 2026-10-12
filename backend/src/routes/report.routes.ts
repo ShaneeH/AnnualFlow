@@ -14,7 +14,10 @@ import {
     createReportPdf,
     getReportExportFilename
 } from "../services/report-export.service";
+import { getJobMode, JobStore, postgresJobStore } from "../services/jobs.service";
 import { deletePDF } from "../services/openai.service";
+import { ReportWorker } from "../services/report-worker";
+import { generateDocumentHash } from "../utils/document-hash";
 import {
     defaultReportProcessingDeps,
     processReportUpload
@@ -40,6 +43,38 @@ import {
 import { parseAndValidateReport } from "../utils/report-validator";
 
 const router = Router();
+
+// ---- Background jobs -------------------------------------------------------
+
+interface JobRuntime {
+    mode: "sync" | "async";
+    store: JobStore;
+    worker: ReportWorker;
+    documentExistsByHash: (hash: string) => Promise<boolean>;
+}
+
+let jobRuntime: JobRuntime | null = null;
+
+/** Lazily created so tests can override it with configureReportJobs. */
+export function getJobRuntime(): JobRuntime {
+    jobRuntime ??= {
+        mode: getJobMode(),
+        store: postgresJobStore,
+        worker: new ReportWorker({
+            describe: error => uploadErrorResponse(error).body
+        }),
+        documentExistsByHash: defaultReportProcessingDeps.documentExistsByHash
+    };
+    return jobRuntime;
+}
+
+/** Test/bootstrap hook to replace the job mode, store or worker. */
+export function configureReportJobs(overrides: Partial<JobRuntime>): JobRuntime {
+    jobRuntime = { ...getJobRuntime(), ...overrides };
+    return jobRuntime;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_ID = 2_147_483_647;
 
 const upload = multer({
@@ -213,6 +248,24 @@ router.get("/", async (req, res) => { const companyId = req.query.companyId === 
     }
 });
 
+router.get("/jobs/:jobId", async (req, res) => {
+    const jobId = String(req.params.jobId ?? "");
+    if (!UUID_PATTERN.test(jobId)) {
+        return sendError(res, 400, "Invalid job ID.");
+    }
+
+    try {
+        const job = await getJobRuntime().store.getJob(jobId);
+        return job
+            ? res.json(job)
+            : sendError(res, 404, "Job not found.");
+    } catch (error) {
+        logRouteError(res, "job status failed", error);
+        const { status, body } = uploadErrorResponse(error);
+        return sendError(res, status, body.error);
+    }
+});
+
 router.get("/stats", async (_req, res) => {
     try {
         return res.json(await getDocumentStats());
@@ -325,6 +378,33 @@ router.post(
 
             progress.start("Validating PDF");
             validatePdfUpload(req.file);
+
+            const runtime = getJobRuntime();
+
+            if (runtime.mode === "async") {
+                // Queue it and return immediately; the worker does the slow part.
+                const documentHash = generateDocumentHash(req.file.buffer);
+                if (await runtime.documentExistsByHash(documentHash)) {
+                    throw new DuplicateDocumentError();
+                }
+
+                const job = await runtime.store.createJob({
+                    originalName: req.file.originalname,
+                    documentHash,
+                    pdf: req.file.buffer,
+                    requestId: String(res.locals.requestId ?? "") || null
+                });
+                runtime.worker.kick();
+                progress.succeed(`Queued job ${job.jobId}`);
+
+                return res.status(202).json({
+                    success: true,
+                    message: "The PDF was accepted and is being analysed.",
+                    jobId: job.jobId,
+                    status: job.status,
+                    statusUrl: `/api/reports/jobs/${job.jobId}`
+                });
+            }
 
             const result = await processReportUpload(
                 req.file.buffer,

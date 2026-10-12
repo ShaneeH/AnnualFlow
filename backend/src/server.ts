@@ -2,15 +2,27 @@ import "dotenv/config";
 
 import app from "./app";
 import { db } from "./database/db";
+import { getJobRuntime } from "./routes/report.routes";
 
 const PORT = Number(process.env.PORT) || 3000;
 let shuttingDown = false;
 
 const server = app.listen(PORT, () => {
-    console.log("\n  ◆ SENUS API");
+    console.log("\n  ◆ REPORT HUB API");
     console.log(`  Local:   http://localhost:${PORT}`);
     console.log(`  Health:  http://localhost:${PORT}/api/health`);
-    console.log(`  Mode:    ${process.env.NODE_ENV ?? "development"}\n`);
+    console.log(`  Mode:    ${process.env.NODE_ENV ?? "development"}`);
+
+    const jobs = getJobRuntime();
+    console.log(`  Jobs:    ${jobs.mode}${jobs.mode === "async" ? " (in-process worker)" : ""}\n`);
+
+    if (jobs.mode === "async") {
+        // Recover work interrupted by a restart, then process anything queued.
+        jobs.store
+            .requeueStaleJobs(10)
+            .catch(error => console.error("[worker] could not requeue stale jobs", error))
+            .finally(() => jobs.worker.kick());
+    }
 });
 
 function shutdown(signal: string): void {
