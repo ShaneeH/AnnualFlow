@@ -34,6 +34,14 @@
             ],
             "styles": [
               "src/styles/theme.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "html2canvas",
+              "dompurify"
             ]
           },
           "configurations": {

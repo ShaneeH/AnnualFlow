@@ -80,6 +80,19 @@
 
         <div class="report-header-actions">
           @if (selectedCompany && selectedPeriod) {
+            <button
+              type="button"
+              class="board-report-button"
+              [disabled]="isGeneratingReport"
+              (click)="downloadBoardReport()"
+              aria-label="Download board report PDF"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
+                <path d="M14 3v5h5M12 12v6M9 15l3 3 3-3" />
+              </svg>
+              {{ isGeneratingReport ? 'Preparing…' : 'Board report' }}
+            </button>
             <app-ai-insight
               [companyId]="selectedCompany.value"
               [period]="selectedPeriod.value"
@@ -99,7 +112,11 @@
         }
       </section>
 
-      <!-- KPI cards: only metrics this report actually contains are shown -->
+      @if (reportError) {
+      <p class="dashboard-error" role="alert">{{ reportError }}</p>
+    }
+
+    <!-- KPI cards: only metrics this report actually contains are shown -->
       @if (kpiCards.length > 0) {
         <div class="kpi-grid">
           @for (card of kpiCards; track card.title) {

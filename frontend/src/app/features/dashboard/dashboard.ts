@@ -15,6 +15,7 @@ import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card';
 import { AiInsightComponent } from '../../shared/components/ai-insight/ai-insight';
 import { MarginsChartComponent } from '../../shared/components/margins-chart/margins-chart';
 import { hasSeries, isPresent } from '../../shared/utils/chart-data';
+import { BoardReportService } from '../../core/services/board-report.service';
 import { DashboardState, loadDashboardState, saveDashboardState } from './dashboard-state';
 import { RevenueChartComponent } from '../../shared/components/revenue-chart/revenue-chart';
 
@@ -106,6 +107,7 @@ interface PeriodRequest {
 export class Dashboard implements OnInit {
   private readonly companyService = inject(CompanyService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly boardReports = inject(BoardReportService);
 
   // Selections flow through these subjects. switchMap cancels the previous
   // request, so a slow response for an old selection can never overwrite
@@ -141,6 +143,10 @@ export class Dashboard implements OnInit {
   isLoadingPeriod = false;
   emptyData = false;
   errorMessage: string | null = null;
+
+  // Board report PDF export state.
+  isGeneratingReport = false;
+  reportError: string | null = null;
 
   // Whether the AI Insight panel is open (persisted and restored).
   insightOpen = false;
@@ -222,6 +228,25 @@ export class Dashboard implements OnInit {
       period: this.selectedPeriod.value,
       compareTo: comparePeriod.value
     });
+  }
+
+  async downloadBoardReport(): Promise<void> {
+    if (!this.selectedCompany || !this.selectedPeriod || this.isGeneratingReport) return;
+
+    this.isGeneratingReport = true;
+    this.reportError = null;
+
+    try {
+      await this.boardReports.download(
+        this.selectedCompany.value,
+        this.selectedPeriod.value,
+        this.selectedCompany.label
+      );
+    } catch (error) {
+      this.reportError = errorMessage(error, 'The board report could not be generated.');
+    } finally {
+      this.isGeneratingReport = false;
+    }
   }
 
   onInsightOpenChange(open: boolean): void {

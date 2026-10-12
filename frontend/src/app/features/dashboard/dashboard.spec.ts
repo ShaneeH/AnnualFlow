@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { provideRouter } from '@angular/router';
 
 import { Dashboard, buildKpiCards } from './dashboard';
+import { BoardReportService } from '../../core/services/board-report.service';
 import { DASHBOARD_STATE_KEY, loadDashboardState } from './dashboard-state';
 import { CompanyService } from '../../core/services/company.service';
 
@@ -322,5 +323,28 @@ describe('Dashboard', () => {
         companyId: 1, period: null, comparePeriod: null, insightOpen: false
       });
     });
+  });
+
+  it('shows a Board report button for a selected period and downloads the PDF', async () => {
+    const boardReports = TestBed.inject(BoardReportService);
+    const download = vi.spyOn(boardReports, 'download').mockResolvedValue('ReportHub_Senus_PLC_FY2025.pdf');
+
+    companyService.getFinancialPeriod.mockReturnValue(of({
+      financials: { companyName: 'Senus PLC', periodLabel: 'FY 2025', revenue: 100 },
+      metrics: {}
+    }));
+    component.companies = [{ label: 'Senus PLC', value: 1 }];
+    component.emptyData = false;
+    component.selectedCompany = { label: 'Senus PLC', value: 1 };
+    component.onPeriodSelected({ label: 'FY 2025', value: 'FY2025' });
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('button.board-report-button');
+    expect(button?.textContent).toContain('Board report');
+
+    await component.downloadBoardReport();
+    expect(download).toHaveBeenCalledWith(1, 'FY2025', 'Senus PLC');
+    expect(component.isGeneratingReport).toBe(false);
   });
 });

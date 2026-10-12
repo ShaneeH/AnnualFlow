@@ -186,3 +186,41 @@ button:hover {
   padding: 0.9rem 1.6rem;
   font-size: 1.05rem;
 }
+
+/* Dashboard "Board report" button */
+.board-report-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--surface-light), var(--surface));
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.board-report-button svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+
+.board-report-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.board-report-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.board-report-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
