@@ -14,7 +14,7 @@
     </p>
 
     <div class="hero-actions">
-      <a href="/" class="button-primary">
+      <a href="/dashboard" class="button-primary">
         Open dashboard
       </a>
 
@@ -140,6 +140,81 @@
         </div>
       </article>
 
+    </div>
+  </section>
+
+
+  <section class="enrichment-section" id="data-enrichment" aria-labelledby="enrichment-heading">
+    <div class="section-heading">
+      <p class="section-label">Data Enrichment</p>
+
+      <h2 id="enrichment-heading">
+        One record per company and period, however many documents you upload
+      </h2>
+    </div>
+
+    <div class="enrichment-body">
+      <p>
+        When a new document covers a company and period that already exist, for example a FY2024 results
+        announcement followed by the full FY2024 annual report, Report Hub <strong>enriches the existing
+        period record</strong> rather than creating a duplicate. In one database transaction it:
+      </p>
+
+      <ul class="enrichment-rules">
+        <li>
+          <strong>Matches</strong> the company by name, case-insensitively, and the period by its code
+          (e.g. <code>FY2024</code>, <code>Q3_2025</code>).
+        </li>
+        <li>
+          <strong>Fills gaps:</strong> each field is merged with <code>COALESCE(new, existing)</code>.
+          Figures the new document provides are written. Figures it leaves out keep their stored value
+          and are never erased.
+        </li>
+        <li>
+          <strong>Flags conflicts:</strong> if both documents give different values for the same field,
+          the newer value is kept and the upload response lists a <code>conflicts[]</code> entry with the
+          period, field, previous value and new value. The app shows these after the upload.
+        </li>
+        <li>
+          <strong>Keeps the sources:</strong> the <code>document_periods</code> table links each period
+          to every document that contributed to it, so one period can have several source documents.
+          The dashboard shows the count and an <em>Enriched</em> badge.
+        </li>
+        <li>
+          <strong>Refreshes derived data:</strong> margins and ratios are recalculated from the merged
+          figures, and any cached AI Insight for that period is cleared so it can be regenerated.
+        </li>
+      </ul>
+
+      <div class="enrichment-example" role="group" aria-label="Example: two FY2024 documents merged into one record">
+        <table>
+          <caption>Example: two FY2024 documents → one enriched record</caption>
+          <thead>
+            <tr>
+              <th scope="col">Field</th>
+              <th scope="col">Document A</th>
+              <th scope="col">Document B (later)</th>
+              <th scope="col">Stored FY2024 record</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Revenue</th><td>210.7m</td><td>210.7m</td><td>210.7m</td></tr>
+            <tr><th scope="row">Net profit</th><td>24.4m</td><td>24.6m</td><td class="cell-conflict">24.6m · conflict reported</td></tr>
+            <tr><th scope="row">Cash</th><td class="cell-empty">-</td><td>48.9m</td><td class="cell-filled">48.9m · gap filled</td></tr>
+            <tr><th scope="row">Customers</th><td>3,540</td><td class="cell-empty">-</td><td>3,540 · kept</td></tr>
+            <tr><th scope="row">Sources</th><td colspan="2">linked through document_periods</td><td>2 documents</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="enrichment-why">
+        <h3>Why it matters</h3>
+        <ul>
+          <li><strong>Single source of truth:</strong> one row per company and period, so KPIs, charts and comparisons never double count.</li>
+          <li><strong>No duplicates:</strong> the same file is refused by its SHA-256 hash, and different files for the same period merge instead of piling up.</li>
+          <li><strong>Traceable sources:</strong> every figure's period knows which documents fed it, and changed values are reported rather than silently replaced.</li>
+        </ul>
+      </div>
     </div>
   </section>
 

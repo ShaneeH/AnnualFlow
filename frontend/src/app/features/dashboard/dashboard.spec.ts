@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { Dashboard, buildKpiCards } from './dashboard';
 import { BoardReportService } from '../../core/services/board-report.service';
@@ -275,6 +275,29 @@ describe('Dashboard', () => {
     expect(robot()).toBeTruthy();
   });
 
+  it('shows the source document count and an Enriched badge for merged periods', () => {
+    const select = (count: number) => {
+      companyService.getFinancialPeriod.mockReturnValue(of({
+        financials: { companyName: 'Senus PLC', periodLabel: 'FY 2025', revenue: 100, sourceDocumentCount: count },
+        metrics: {}
+      }));
+      component.selectedCompany = { label: 'Senus PLC', value: 1 };
+      component.emptyData = false;
+      component.companies = [{ label: 'Senus PLC', value: 1 }];
+      component.onPeriodSelected({ label: 'FY 2025', value: 'FY2025' });
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    let el = select(1);
+    expect(el.querySelector('.source-meta')?.textContent).toContain('Sources: 1 document');
+    expect(el.querySelector('.enriched-badge')).toBeNull();
+
+    el = select(3);
+    expect(el.querySelector('.source-meta')?.textContent).toContain('Sources: 3 documents');
+    expect(el.querySelector('.enriched-badge')?.textContent).toContain('Enriched');
+  });
+
   describe('state persistence', () => {
     const companies = [{ companyId: 1, companyName: 'Senus PLC' }, { companyId: 2, companyName: 'Other' }];
     const periods = [
@@ -294,6 +317,29 @@ describe('Dashboard', () => {
       component = fixture.componentInstance;
       fixture.detectChanges();
     }
+
+    it('a ?companyId= deep link (Try the demo) opens that company on its latest period', async () => {
+      localStorage.setItem(DASHBOARD_STATE_KEY, JSON.stringify({ companyId: 1, period: 'FY2024', comparePeriod: null, insightOpen: false }));
+      companyService.getCompanies.mockReturnValue(of(companies));
+      companyService.getPeriods.mockReturnValue(of(periods));
+      companyService.getFinancialPeriod.mockReturnValue(of(financial));
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [Dashboard],
+        providers: [
+          provideRouter([]),
+          { provide: CompanyService, useValue: companyService },
+          { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ companyId: '2' }) } } }
+        ]
+      }).compileComponents();
+      fixture = TestBed.createComponent(Dashboard);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.selectedCompany?.value).toBe(2);
+      expect(component.selectedPeriod?.value).toBe('FY2025');
+    });
 
     it('saves selections as the user makes them', () => {
       component.companies = [{ label: 'Senus PLC', value: 1 }];

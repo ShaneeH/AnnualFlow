@@ -36,6 +36,9 @@ export interface FinancialPeriod {
         totalAssets?: number | null;
         totalLiabilities?: number | null;
         eps?: number | null;
+
+        // Data Enrichment: number of documents merged into this period record.
+        sourceDocumentCount?: number;
     };
 
     metrics: {

@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, Subject, catchError, finalize, forkJoin, switchMap, tap } from 'rxjs';
 
@@ -106,6 +106,7 @@ interface PeriodRequest {
 })
 export class Dashboard implements OnInit {
   private readonly companyService = inject(CompanyService);
+  private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly boardReports = inject(BoardReportService);
 
@@ -125,6 +126,14 @@ export class Dashboard implements OnInit {
 
   // Current dashboard selections.
   selectedCompany: DropdownOption<number> | null = null;
+
+  // Set when opened via ?companyId=: select the company's latest period.
+  private restoreLatestPeriod = false;
+
+  /** Number of source documents merged into the selected period (Data Enrichment). */
+  get sourceDocumentCount(): number {
+    return this.financialPeriod?.financials.sourceDocumentCount ?? 0;
+  }
 
   // Companies seeded as fictional demo data (shown with a "Demo data" badge).
   demoCompanyIds = new Set<number>();
@@ -186,6 +195,14 @@ export class Dashboard implements OnInit {
 
     const saved = loadDashboardState();
     this.pendingRestore = saved.companyId !== null ? saved : null;
+
+    // Deep link from the landing page ("Try the demo"): /dashboard?companyId=N
+    // opens that company on its latest period, overriding the saved state.
+    const linkedId = Number(this.route?.snapshot.queryParamMap.get('companyId'));
+    if (Number.isInteger(linkedId) && linkedId > 0) {
+      this.pendingRestore = { companyId: linkedId, period: null, comparePeriod: null, insightOpen: false };
+      this.restoreLatestPeriod = true;
+    }
 
     this.loadCompanies();
   }
@@ -294,7 +311,9 @@ export class Dashboard implements OnInit {
     const saved = this.pendingRestore;
     if (!saved) return;
 
-    const period = this.periods.find(option => option.value === saved.period);
+    const period = this.periods.find(option => option.value === saved.period)
+      ?? (this.restoreLatestPeriod ? this.periods[0] : undefined);
+    this.restoreLatestPeriod = false;
     const compare = this.periods.find(
       option => option.value === saved.comparePeriod && option.value !== saved.period
     );

@@ -22,6 +22,7 @@
 - **KPI dashboard:** revenue, gross/operating profit, EBITDA, net profit, cash, debt, assets, liabilities, equity, operating cash flow, EPS, customers, with derived margins and ratios, period-over-period comparison and charts (revenue, margins over time, customers). Charts and cards only appear when there is data for them.
 - **AI Insight:** a slide-out panel explaining performance, market/economic/social factors, improvement areas and risks, grounded only in the stored KPIs. Cached per period, can be regenerated and copied.
 - **Board report PDF:** a branded PDF with the KPI table, changes vs the previous period, charts and the cached AI insight.
+- **Data Enrichment:** upload another document for a company and period you already have (e.g. a FY2024 results announcement, then the FY2024 annual report) and Report Hub **enriches the existing period record** instead of creating a duplicate. New figures fill gaps, missing figures never erase stored ones, and changed figures are reported as `conflicts[]`. Every period keeps links to all of its source documents, and the dashboard shows *Sources: N documents* with an *Enriched* badge.
 - **Duplicate detection:** SHA-256 of every uploaded PDF; the same file is never processed twice.
 - **Demo mode:** `npm run db:seed:demo` loads *Northwind Analytics plc*, a **fictional** company, marked with a *Demo data* badge.
 
@@ -58,6 +59,7 @@ flowchart LR
 
 - **Deterministic KPI maths.** The AI only *extracts* reported figures. Margins, ratios and period-over-period changes are computed in TypeScript on the server, so they are reproducible and testable. The AI Insight prompt receives these numbers and is told not to recompute or invent figures.
 - **AI output is untrusted input.** Structured output uses a strict JSON schema, and the result is validated again on the server: types, plausible values, period format, at least one core metric, and an explicit `isFinancialReport` classification. Anything that fails returns `422` before any DB write.
+- **Data Enrichment by merge, not insert.** Companies are matched by name, case-insensitively, and periods by `(company, period)`. Each field is written as `COALESCE(new, existing)`, so incoming values update the record and nulls never overwrite. Before the update, any field where both values are non-null and differ is collected into `conflicts[]` and returned to the client. Many-to-many `document_periods` rows keep provenance, and derived metrics and cached AI insights are refreshed from the merged figures.
 - **Idempotency and dedup.** A SHA-256 hash with a unique constraint stops the same PDF being processed twice. Re-running migrations and the demo seed is safe.
 - **Transactions.** A company, its document, its periods and their links are written in one transaction, so a failure leaves nothing half-saved. Cached AI insights are invalidated when their figures change.
 - **Rate limiting** on uploads and AI generation protects the OpenAI bill.

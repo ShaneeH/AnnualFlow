@@ -74,7 +74,14 @@ export async function getFinancialPeriod(
             fp.operating_cash_flow AS "operatingCashFlow",
             fp.total_assets AS "totalAssets",
             fp.total_liabilities AS "totalLiabilities",
-            fp.eps AS "eps"
+            fp.eps AS "eps",
+
+            -- Data Enrichment: how many uploaded documents contributed to this period.
+            (
+                SELECT COUNT(*)::int
+                FROM document_periods dp
+                WHERE dp.period_id = fp.period_id
+            ) AS "sourceDocumentCount"
 
         FROM companies c
 

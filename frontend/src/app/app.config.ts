@@ -7,7 +7,7 @@ import {
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { apiErrorInterceptor } from './core/interceptors/api-error.interceptor';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { routes } from './app.routes';
 
@@ -21,6 +21,6 @@ export const appConfig: ApplicationConfig = {
 
     provideHttpClient(withInterceptors([apiErrorInterceptor])),
 
-    provideRouter(routes)
+    provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }))
   ]
 };
