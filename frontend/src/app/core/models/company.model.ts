@@ -4,4 +4,7 @@ export interface Company {
 
     companyName: string;
 
+    // True for seeded fictional demo data (npm run db:seed:demo).
+    isDemo?: boolean;
+
 }

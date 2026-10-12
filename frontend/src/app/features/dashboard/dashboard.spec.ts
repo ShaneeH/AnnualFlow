@@ -69,6 +69,21 @@ describe('Dashboard', () => {
     ]);
   });
 
+  it('should label demo companies and show a Demo data badge for them', () => {
+    companyService.getCompanies.mockReturnValue(of([
+      { companyId: 1, companyName: 'Senus PLC', isDemo: false },
+      { companyId: 2, companyName: 'Northwind Analytics plc', isDemo: true }
+    ]));
+
+    component.ngOnInit();
+
+    expect(component.companies.map(c => c.label)).toEqual(['Senus PLC', 'Northwind Analytics plc (demo)']);
+    component.selectedCompany = component.companies[1];
+    expect(component.isDemoCompany).toBe(true);
+    component.selectedCompany = component.companies[0];
+    expect(component.isDemoCompany).toBe(false);
+  });
+
   it('should load periods and history when a company is selected', () => {
     component.onCompanySelected({
       label: 'Senus PLC',

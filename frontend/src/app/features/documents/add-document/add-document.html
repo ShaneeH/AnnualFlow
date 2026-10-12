@@ -77,7 +77,10 @@
           [disabled]="!selectedFile || isUploading"
           (click)="uploadDocument()"
         >
-          @if (isUploading) {
+          @if (isProcessing) {
+            <span class="spinner"></span>
+            Processing… you can leave this page, we'll notify you
+          } @else if (isUploading) {
             <span class="spinner"></span>
             Analysing document…
           } @else {

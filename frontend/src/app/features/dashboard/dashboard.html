@@ -69,7 +69,12 @@
         <div class="report-header-main">
           <div class="report-field">
             <span class="report-label">Company</span>
-            <h2>{{ financialPeriod.financials.companyName }}</h2>
+            <h2>
+              {{ financialPeriod.financials.companyName }}
+              @if (isDemoCompany) {
+                <span class="demo-badge" title="Fictional company and figures, for demonstration only">Demo data</span>
+              }
+            </h2>
           </div>
 
           <div class="report-field">

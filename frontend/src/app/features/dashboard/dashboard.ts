@@ -125,6 +125,13 @@ export class Dashboard implements OnInit {
 
   // Current dashboard selections.
   selectedCompany: DropdownOption<number> | null = null;
+
+  // Companies seeded as fictional demo data (shown with a "Demo data" badge).
+  demoCompanyIds = new Set<number>();
+
+  get isDemoCompany(): boolean {
+    return !!this.selectedCompany && this.demoCompanyIds.has(this.selectedCompany.value);
+  }
   selectedPeriod: DropdownOption<string> | null = null;
   selectedComparePeriod: DropdownOption<string> | null = null;
 
@@ -347,8 +354,11 @@ export class Dashboard implements OnInit {
       )
       .subscribe({
         next: companies => {
+          this.demoCompanyIds = new Set(
+            companies.filter(company => company.isDemo).map(company => company.companyId)
+          );
           this.companies = companies.map(company => ({
-            label: company.companyName,
+            label: company.isDemo ? `${company.companyName} (demo)` : company.companyName,
             value: company.companyId
           }));
 
