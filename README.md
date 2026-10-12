@@ -1,132 +1,123 @@
 # Report Hub
 
-**AI Financial Document Intelligence Platform**
+[![CI](https://github.com/ShaneeH/senus-board-reporting/actions/workflows/ci.yml/badge.svg)](https://github.com/ShaneeH/senus-board-reporting/actions/workflows/ci.yml)
 
-An intelligent platform that turns complex financial reports into clear, structured data automatically.
+**Upload a company's financial report PDF and get validated KPIs, trend charts, an AI-written board briefing and a one-click board-report PDF.**
 
-This project is being developed as part of a graduate software engineering technical assessment. It shows how modern AI can work together with solid backend systems and databases to solve a real business problem.
+**Live demo:** https://senus-frontend.vercel.app
 
----
-
-## The Problem
-
-Financial reports are long. They often run to hundreds of pages filled with statements, notes, and commentary. Manually pulling out the key numbers is slow, repetitive, and easy to get wrong.
-
-This platform removes that manual work.
+<!--
+  TODO (Shane): record a short demo and save it as docs/demo.gif (see docs/README.md),
+  then remove this comment. The image below will render once the file exists.
+-->
+![Report Hub demo](docs/demo.gif)
 
 ---
 
-## What It Does
+## Features
 
-Simply upload a financial PDF and the system takes care of the rest:
+- **PDF to structured data:** upload an annual/interim report; the OpenAI Responses API extracts companies, periods and figures into a strict JSON schema.
+- **Rejects non-financial documents:** the model classifies the document *and* deterministic server-side checks run before anything is written. A CV, invoice or brochure is refused with a clear message and nothing is stored.
+- **Background processing:** uploads return `202 Accepted` with a job id; a worker analyses the PDF while the UI shows *Processing…* and a toast fires on success, rejection or failure.
+- **KPI dashboard:** revenue, gross/operating profit, EBITDA, net profit, cash, debt, assets, liabilities, equity, operating cash flow, EPS, customers, with derived margins and ratios, period-over-period comparison and charts (revenue, margins over time, customers). Charts and cards only appear when there is data for them.
+- **AI Insight:** a slide-out panel explaining performance, market/economic/social factors, improvement areas and risks, grounded only in the stored KPIs. Cached per period, can be regenerated and copied.
+- **Board report PDF:** a branded PDF with the KPI table, changes vs the previous period, charts and the cached AI insight.
+- **Duplicate detection:** SHA-256 of every uploaded PDF; the same file is never processed twice.
+- **Demo mode:** `npm run db:seed:demo` loads *Northwind Analytics plc*, a **fictional** company, marked with a *Demo data* badge.
 
-- Reads and understands the document using AI  
-- Pulls out the important financial figures  
-- Checks that the information is complete and accurate  
-- Creates a unique ID for the report  
-- Detects if the same report has already been uploaded  
-- Saves everything cleanly in a database  
-- Makes the data ready for easy viewing and analysis  
+## Tech stack
 
-The long-term vision is a smart financial reporting platform that can handle reports from thousands of companies.
+| Layer | Tech |
+| --- | --- |
+| Frontend | Angular 21 (standalone components, RxJS), Chart.js, jsPDF, Vitest |
+| Backend | Node.js 20, Express 5, TypeScript, Multer, express-rate-limit, `node:test` |
+| AI | OpenAI Responses API + Files API, strict JSON-schema structured output |
+| Database | PostgreSQL (`pg`), SQL migrations |
+| CI / hosting | GitHub Actions, Vercel (frontend), Postgres on Neon or similar |
 
----
+## Architecture
 
-## Key Features
+```mermaid
+flowchart LR
+    U[Browser] --> FE[Angular SPA]
+    FE -->|REST /api| API[Express API]
+    API -->|parameterised SQL, transactions| DB[(PostgreSQL)]
+    API -->|insert job 202 Accepted| Q[(report_jobs)]
+    Q --> W[Job worker]
+    W -->|PDF + JSON schema| OAI[OpenAI Responses API]
+    W -->|validate, then save| DB
+    API -->|KPIs to AI Insight| OAI
+    FE -->|poll GET /reports/jobs/:id| API
+```
 
-### Smart PDF Understanding
-Works with many types of financial documents, including:
+1. `POST /api/reports/add` checks the PDF (type, size, magic bytes), hashes it and refuses duplicates. It then queues a `report_jobs` row and returns `202` with a `jobId`.
+2. The worker claims jobs with `FOR UPDATE SKIP LOCKED` and sends the PDF to OpenAI with a strict schema. It validates the result and saves it in one transaction. It also deletes the uploaded file from OpenAI, whatever the outcome.
+3. The frontend polls `GET /api/reports/jobs/:id` and shows a toast when the job is `succeeded`, `rejected` or `failed`.
 
-- Annual Reports  
-- Interim Reports  
-- Information Documents  
-- Investor Reports  
-- Financial Statements  
+## Key engineering decisions
 
-Instead of relying on rigid rules or basic text extraction, the system uses AI to actually understand the content of each report.
+- **Deterministic KPI maths.** The AI only *extracts* reported figures. Margins, ratios and period-over-period changes are computed in TypeScript on the server, so they are reproducible and testable. The AI Insight prompt receives these numbers and is told not to recompute or invent figures.
+- **AI output is untrusted input.** Structured output uses a strict JSON schema, and the result is validated again on the server: types, plausible values, period format, at least one core metric, and an explicit `isFinancialReport` classification. Anything that fails returns `422` before any DB write.
+- **Idempotency and dedup.** A SHA-256 hash with a unique constraint stops the same PDF being processed twice. Re-running migrations and the demo seed is safe.
+- **Transactions.** A company, its document, its periods and their links are written in one transaction, so a failure leaves nothing half-saved. Cached AI insights are invalidated when their figures change.
+- **Rate limiting** on uploads and AI generation protects the OpenAI bill.
+- **Typed errors.** OpenAI, database and validation failures map to specific HTTP statuses and readable messages (e.g. 429 rate limit, 504 timeout, 503 missing key). They are logged with a request id.
+- **Migrations.** Numbered, idempotent SQL files (`backend/database/migrations`) applied under a Postgres advisory lock and recorded in `schema_migrations`.
+- **Sync or async jobs.** `JOB_MODE=async` uses the in-process worker on long-running hosts. `JOB_MODE=sync` processes inside the request and is the default when `VERCEL` is set, because serverless functions are frozen after responding.
 
-### Accurate Financial Data Extraction
-Automatically finds and extracts key figures such as:
+## Local setup (Linux)
 
-- Revenue  
-- Gross Profit  
-- Operating Profit  
-- EBITDA  
-- Net Profit  
-- Cash  
-- Debt  
-- Net Assets  
-- Customer Numbers  
+Prerequisites: Node 20+, PostgreSQL 14+, an OpenAI API key.
 
-The AI is carefully instructed to extract only what is written in the document — no calculations or estimates are added. The numbers stay true to the original report.
+```bash
+git clone https://github.com/ShaneeH/senus-board-reporting.git
+cd senus-board-reporting
 
-### Multiple Time Periods in One Go
-Many reports contain figures for more than one period. The platform automatically finds all of them, for example:
+# Database
+sudo -u postgres createuser --pwprompt reporthub
+sudo -u postgres createdb -O reporthub reporthub
 
-- FY2025  
-- FY2024  
-- Q1 2025  
-- Q4 2024  
+# Backend
+cd backend
+cp .env.example .env
+#   DATABASE_URL=postgres://reporthub:<password>@localhost:5432/reporthub
+#   OPENAI_API_KEY=sk-...
+#   OPENAI_MODEL=<a model that supports PDF input + structured output>
+#   JOB_MODE=async   # optional; async is the default outside Vercel
+npm ci
+npm run db:migrate
+npm run db:seed:demo      # optional: fictional Northwind Analytics plc data
+npm run dev               # http://localhost:3000
 
-This makes year-on-year or quarter-on-quarter comparisons much easier without needing to upload the same document multiple times.
+# Frontend (new terminal)
+cd ../frontend
+npm ci
+npx ng serve              # http://localhost:4200, uses the development environment -> localhost:3000
+```
 
-### Clear AI-Written Summaries
-For every document, the AI also creates short, readable summaries covering:
+## Testing
 
-- How the company performed  
-- Key financial highlights  
-- The business outlook  
+```bash
+cd backend && npm test                      # build + node:test (services, validators, routes, worker, OpenAI fakes)
+cd frontend && npx ng test --watch=false    # Vitest unit tests for components and services
+```
 
-These summaries are stored alongside the numbers so they’re easy to review later.
+GitHub Actions runs both suites plus production builds on every push and pull request.
 
-### Unique Report Identification
-Every report is given a consistent ID based on its content. This means:
+## Deployment notes
 
-- The same report always gets the same ID  
-- Duplicate uploads are easily detected  
-- Reports stay organised and easy to manage  
+- **Frontend:** Vercel (`frontend/`, Angular preset). The production `apiUrl` is in `src/environments/environment.ts`.
+- **Backend:** It works on Vercel with `JOB_MODE=sync`. Background jobs need a long-running host such as Render, Railway, Fly.io or a VM, with `JOB_MODE=async`. On serverless, the process is frozen once the response is sent, so the in-process worker would never run.
+- **Database:** any Postgres (e.g. Neon). Run `npm run db:migrate` against it.
 
-### Built-in Quality Checks
-Before anything is saved, the system checks that essential details are present and valid:
+## Roadmap
 
-- Company name  
-- Report title  
-- Report type  
-- Financial periods  
-
-Incomplete or unclear results are stopped before they reach the database.
-
-### No More Duplicate Reports
-If the same report is uploaded again, the system recognises it and avoids re-processing. At the same time, new reports from the same company can still add extra information, helping build a richer picture over time.
-
-### Clean Database Storage
-All information is stored in a well-structured PostgreSQL database designed around:
-
-- Companies  
-- Documents  
-- Reporting periods  
-- Financial metrics  
-
-This makes the data easy to query and ready to grow as more reports are added.
-
-
-## Technology Overview
-
-**Frontend**  
-- Angular (in progress)
-
-**Backend**  
-- Node.js + Express + TypeScript
-
-**Database**  
-- PostgreSQL
-
-**AI**  
-- OpenAI Responses API and Files API
-
-**Tools used during development**  
-- Bruno, Postman, Git, VS Code
+- **Authentication** and per-user workspaces (write endpoints are open in the demo)
+- **Review before save:** show extracted figures for confirmation or editing before they're committed
+- **Source citations:** link each figure to the page/table it came from
+- **Ask your report:** chat over a stored report, grounded in its figures
+- **Anomaly alerts:** flag unusual swings between periods automatically
 
 ---
 
-
+*Northwind Analytics plc is a fictional company. Its figures are made up for demonstration only.*
