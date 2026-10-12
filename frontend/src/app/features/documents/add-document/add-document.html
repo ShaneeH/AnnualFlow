@@ -1,6 +1,5 @@
 <section class="add-document">
   <header class="page-header">
-    <span class="page-eyebrow">Document Import</span>
     <h1>Add Financial Document</h1>
     <p>
       Upload a financial report and Report Hub will analyse the
@@ -54,17 +53,13 @@
       @if (rejectionMessage) {
         <div class="rejection-card" role="alert">
           <div class="rejection-title">
-            <span class="message-icon">!</span>
-            Not a financial report
+            <span><span class="message-icon">!</span> Not a financial report. Nothing was saved.</span>
+            <button type="button" class="rejection-retry" (click)="fileInput.click()">
+              Choose a different PDF
+            </button>
           </div>
           <p>{{ rejectionMessage }}</p>
-          <p class="rejection-hint">
-            Report Hub only accepts company financial reports such as annual or
-            interim reports and financial statements. Nothing was saved.
-          </p>
-          <button type="button" class="rejection-retry" (click)="fileInput.click()">
-            Choose a different PDF
-          </button>
+          <p class="rejection-hint">Only company financial reports (annual/interim reports, financial statements) are accepted.</p>
         </div>
       }
 

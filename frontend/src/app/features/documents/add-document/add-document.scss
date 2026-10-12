@@ -18,38 +18,38 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
 .add-document {
   max-width: 880px;
   margin: 0 auto;
-  padding: 4rem 2rem 6rem;
+  padding: 0.25rem 1rem 0.5rem;
   font-family: $font;
   color: $text;
 }
 
 // ── Header ────────────────────────────────────────────────────
 .page-header {
-  margin-bottom: 2.75rem;
+  margin-bottom: 0.6rem;
 
   .page-eyebrow {
     display: inline-block;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: $accent;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
   }
 
   h1 {
-    font-size: 2.75rem;
+    font-size: 1.6rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.25rem;
   }
 
   p {
-    font-size: 1.15rem;
-    line-height: 1.6;
+    font-size: 0.92rem;
+    line-height: 1.45;
     color: $text-dim;
     margin: 0;
-    max-width: 52ch;
+    max-width: none;
   }
 }
 
@@ -58,7 +58,7 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   background: $surface;
   border: 3px solid $border;
   border-radius: $radius;
-  padding: 2.25rem;
+  padding: 0.75rem;
 }
 
 .upload-area {
@@ -66,7 +66,14 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   overflow: hidden;
   border: 2.5px dashed $border;
   border-radius: $radius - 2px;
-  padding: 4.5rem 2.5rem;
+  padding: 1rem 1.5rem;
+  min-height: 140px;
+  max-height: 150px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.18s ease, background 0.18s ease;
@@ -87,22 +94,22 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   .upload-icon {
     display: inline-flex;
     color: $text-dim;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.4rem;
     transition: color 0.18s ease, transform 0.18s ease;
 
-    svg { width: 38px; height: 38px; }
+    svg { width: 26px; height: 26px; }
   }
 
   h2 {
-    font-size: 1.4rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.2rem;
   }
 
   p {
-    font-size: 1.05rem;
+    font-size: 0.88rem;
     color: $text-dim;
-    margin: 0 0 1.25rem;
+    margin: 0 0 0.5rem;
   }
 
   .file-type {
@@ -124,6 +131,7 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
 }
 
 .selected-file {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -132,7 +140,7 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   .file-glyph {
     flex-shrink: 0;
     width: 60px;
-    height: 60px;
+    height: 48px;
     border-radius: 10px;
     background: $accent-dim;
     color: $accent;
@@ -183,8 +191,8 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 1.25rem;
-  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 9px;
   font-size: 0.95rem;
 }
@@ -210,12 +218,12 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
 
 // ── Actions ───────────────────────────────────────────────────
 .upload-actions {
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
 }
 
 .upload-button {
   width: 100%;
-  padding: 1.05rem 1.5rem;
+  padding: 0.7rem 1.25rem;
   border: none;
   border-radius: 9px;
   background: $accent;
@@ -251,12 +259,12 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
 // ── Success state ─────────────────────────────────────────────
 .upload-success {
   text-align: center;
-  padding: 3rem 2rem 1.5rem;
+  padding: 1rem 1rem 0.5rem;
 
   .success-icon {
     width: 64px;
-    height: 64px;
-    margin: 0 auto 1.5rem;
+    height: 48px;
+    margin: 0 auto 0.75rem;
     border-radius: 50%;
     background: $accent-dim;
     color: $accent;
@@ -291,7 +299,7 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
 
   .success-note {
     color: $text-faint;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -352,34 +360,37 @@ $mono:      'JetBrains Mono', ui-monospace, monospace;
   .page-header h1 { font-size: 2rem; }
 }
 .rejection-card {
-  margin-top: 1rem;
-  padding: 1rem 1.25rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.9rem;
   border: 1px solid rgba(245, 158, 11, 0.5);
   border-radius: 12px;
   background: rgba(245, 158, 11, 0.08);
   color: #fde68a;
 
   p {
-    margin: 0.5rem 0 0;
-    line-height: 1.5;
+    margin: 0.35rem 0 0;
+    line-height: 1.4;
+    font-size: 0.88rem;
   }
 
   .rejection-title {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 0.5rem;
     font-weight: 600;
     color: #fbbf24;
   }
 
   .rejection-hint {
-    color: #d4d4d8;
-    font-size: 0.9rem;
+    color: #a1a1aa;
+    font-size: 0.8rem;
   }
 
   .rejection-retry {
-    margin-top: 0.85rem;
-    padding: 0.5rem 0.9rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.85rem;
     border-radius: 8px;
     border: 1px solid rgba(251, 191, 36, 0.6);
     background: transparent;
