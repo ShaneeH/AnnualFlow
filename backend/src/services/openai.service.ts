@@ -92,6 +92,40 @@ export async function analysePDF(
   return response.output_text;
 }
 
+/**
+ * Text-only structured generation (no files, no tools, no web search).
+ * Returns the raw JSON text; callers must validate it.
+ */
+export async function generateStructuredJson(options: {
+  instructions: string;
+  input: string;
+  schemaName: string;
+  schema: Record<string, unknown>;
+  maxOutputTokens?: number;
+}): Promise<{ text: string; model: string }> {
+  const response = await getClient().responses.create({
+    model: MODEL,
+    instructions: options.instructions,
+    input: options.input,
+    text: {
+      format: {
+        type: "json_schema",
+        name: options.schemaName,
+        strict: true,
+        schema: options.schema
+      }
+    },
+    max_output_tokens: options.maxOutputTokens ?? 4_000,
+    store: false
+  });
+
+  if (!response.output_text) {
+    throw new AnalysisServiceError("The insight service returned an empty response.");
+  }
+
+  return { text: response.output_text, model: MODEL };
+}
+
 export async function uploadPDF(
   pdf: Buffer,
   originalName = "financial-report.pdf"

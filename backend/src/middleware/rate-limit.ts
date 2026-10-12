@@ -46,3 +46,16 @@ export const exportLimiter = rateLimit({
         error: "Too many export requests. Please try again later."
     }
 });
+
+// AI insight generation calls the model, so it gets its own strict allowance.
+// Only POST (generation) uses this; reading a cached insight does not.
+export const insightLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: "Too many AI insight requests. Please try again later."
+    }
+});

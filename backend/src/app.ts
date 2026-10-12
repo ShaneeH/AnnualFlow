@@ -5,6 +5,7 @@ import healthRoutes from "./routes/health.routes";
 import openAiRoutes from "./routes/openai.routes";
 import reportRoutes from "./routes/report.routes";
 import companiesRouter from "./routes/companies.routes";
+import insightsRouter from "./routes/insights.routes";
 
 import { apiLimiter } from "./middleware/rate-limit";
 import {
@@ -82,6 +83,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/openai", openAiRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/companies", companiesRouter);
+app.use("/api/insights", insightsRouter);
 
 app.use((_req, res) => {
     res.status(404).json({

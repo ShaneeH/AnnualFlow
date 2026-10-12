@@ -185,6 +185,12 @@ export async function saveFinancialDocument(
                 conflicts
             );
 
+            // The period's figures may have changed: invalidate its cached insight.
+            await client.query(
+                "DELETE FROM ai_insights WHERE company_id = $1 AND period = $2",
+                [companyId, period.period]
+            );
+
             await linkDocumentToPeriod(
                 client,
                 documentId,
@@ -390,6 +396,21 @@ export async function deleteFinancialDocument(
                 [periodIds]
             );
         }
+
+        // Drop cached AI insights whose financial period no longer exists.
+        await client.query(
+            `
+            DELETE FROM ai_insights ai
+            WHERE ai.company_id = $1
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM financial_periods fp
+                  WHERE fp.company_id = ai.company_id
+                    AND fp.period = ai.period
+              );
+            `,
+            [row.company_id]
+        );
 
         await client.query(
             `
