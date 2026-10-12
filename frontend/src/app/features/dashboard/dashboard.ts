@@ -15,6 +15,7 @@ import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card';
 import { AiInsightComponent } from '../../shared/components/ai-insight/ai-insight';
 import { MarginsChartComponent } from '../../shared/components/margins-chart/margins-chart';
 import { hasSeries, isPresent } from '../../shared/utils/chart-data';
+import { DashboardState, loadDashboardState, saveDashboardState } from './dashboard-state';
 import { RevenueChartComponent } from '../../shared/components/revenue-chart/revenue-chart';
 
 export interface KpiCard {
@@ -141,6 +142,12 @@ export class Dashboard implements OnInit {
   emptyData = false;
   errorMessage: string | null = null;
 
+  // Whether the AI Insight panel is open (persisted and restored).
+  insightOpen = false;
+
+  // Saved selections waiting to be validated against freshly loaded data.
+  private pendingRestore: DashboardState | null = null;
+
   ngOnInit(): void {
     this.companyChanges
       .pipe(
@@ -164,6 +171,9 @@ export class Dashboard implements OnInit {
       )
       .subscribe();
 
+    const saved = loadDashboardState();
+    this.pendingRestore = saved.companyId !== null ? saved : null;
+
     this.loadCompanies();
   }
 
@@ -179,6 +189,9 @@ export class Dashboard implements OnInit {
     this.comparePeriods = [];
     this.setHistory([]);
 
+    if (!this.pendingRestore) this.insightOpen = false;
+    this.persist();
+
     this.companyChanges.next(company.value);
   }
 
@@ -190,6 +203,7 @@ export class Dashboard implements OnInit {
     this.comparePeriods = this.periods.filter(option => option.value !== period.value);
 
     if (!this.selectedCompany) return;
+    this.persist();
 
     this.periodChanges.next({
       companyId: this.selectedCompany.value,
@@ -201,12 +215,73 @@ export class Dashboard implements OnInit {
     this.selectedComparePeriod = comparePeriod;
 
     if (!this.selectedCompany || !this.selectedPeriod) return;
+    this.persist();
 
     this.periodChanges.next({
       companyId: this.selectedCompany.value,
       period: this.selectedPeriod.value,
       compareTo: comparePeriod.value
     });
+  }
+
+  onInsightOpenChange(open: boolean): void {
+    this.insightOpen = open;
+    this.persist();
+  }
+
+  /** Saves the current selections (skipped while a restore is in progress). */
+  private persist(): void {
+    if (this.pendingRestore) return;
+
+    saveDashboardState({
+      companyId: this.selectedCompany?.value ?? null,
+      period: this.selectedPeriod?.value ?? null,
+      comparePeriod: this.selectedComparePeriod?.value ?? null,
+      insightOpen: this.insightOpen
+    });
+  }
+
+  /** Step 1 of restore: re-select the saved company if it still exists. */
+  private restoreCompany(): void {
+    const saved = this.pendingRestore;
+    if (!saved) return;
+
+    const company = this.companies.find(option => option.value === saved.companyId);
+    if (!company) {
+      // Stale company (e.g. its reports were deleted): drop the saved state.
+      this.pendingRestore = null;
+      this.persist();
+      return;
+    }
+
+    this.onCompanySelected(company);
+  }
+
+  /** Step 2 of restore: re-select period, comparison and panel state if still valid. */
+  private restorePeriods(): void {
+    const saved = this.pendingRestore;
+    if (!saved) return;
+
+    const period = this.periods.find(option => option.value === saved.period);
+    const compare = this.periods.find(
+      option => option.value === saved.comparePeriod && option.value !== saved.period
+    );
+
+    // Clear before selecting so the selections below are persisted.
+    this.pendingRestore = null;
+
+    if (!period) {
+      this.insightOpen = false;
+      this.persist();
+      return;
+    }
+
+    this.insightOpen = saved.insightOpen;
+    this.onPeriodSelected(period);
+
+    if (compare) {
+      this.onComparePeriodSelected(compare);
+    }
   }
 
   retry(): void {
@@ -253,6 +328,7 @@ export class Dashboard implements OnInit {
           }));
 
           this.emptyData = companies.length === 0;
+          this.restoreCompany();
         },
         error: error => {
           this.errorMessage = errorMessage(error, 'Failed to load companies.');
@@ -271,9 +347,11 @@ export class Dashboard implements OnInit {
           value: period.period
         }));
         this.setHistory(history);
+        this.restorePeriods();
       }),
       catchError(error => {
         this.errorMessage = errorMessage(error, 'Failed to load company data.');
+        this.pendingRestore = null;
         return EMPTY;
       }),
       finalize(() => (this.isLoadingCompany = false))

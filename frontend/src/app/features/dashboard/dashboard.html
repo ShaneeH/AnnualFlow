@@ -85,6 +85,8 @@
               [period]="selectedPeriod.value"
               [companyName]="financialPeriod.financials.companyName"
               [periodLabel]="financialPeriod.financials.periodLabel"
+              [initiallyOpen]="insightOpen"
+              (openChange)="onInsightOpenChange($event)"
             />
           }
         </div>

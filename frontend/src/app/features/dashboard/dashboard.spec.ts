@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { provideRouter } from '@angular/router';
 
 import { Dashboard, buildKpiCards } from './dashboard';
+import { DASHBOARD_STATE_KEY, loadDashboardState } from './dashboard-state';
 import { CompanyService } from '../../core/services/company.service';
 
 describe('Dashboard', () => {
@@ -19,8 +20,9 @@ describe('Dashboard', () => {
   };
 
   beforeEach(async () => {
-    // Reset mocks before every test.
+    // Reset mocks and persisted state before every test.
     vi.clearAllMocks();
+    localStorage.clear();
 
     companyService.getCompanies.mockReturnValue(of([]));
     companyService.getPeriods.mockReturnValue(of([]));
@@ -255,5 +257,70 @@ describe('Dashboard', () => {
     fixture.detectChanges();
 
     expect(robot()).toBeTruthy();
+  });
+
+  describe('state persistence', () => {
+    const companies = [{ companyId: 1, companyName: 'Senus PLC' }, { companyId: 2, companyName: 'Other' }];
+    const periods = [
+      { periodId: 1, period: 'FY2025', periodLabel: 'FY 2025', periodEnd: '2025-12-31' },
+      { periodId: 2, period: 'FY2024', periodLabel: 'FY 2024', periodEnd: '2024-12-31' }
+    ];
+    const financial = { financials: { companyName: 'Senus PLC', periodLabel: 'FY 2025', revenue: 1 }, metrics: {} };
+
+    function restart(saved: object) {
+      localStorage.setItem(DASHBOARD_STATE_KEY, JSON.stringify(saved));
+      companyService.getCompanies.mockReturnValue(of(companies));
+      companyService.getPeriods.mockReturnValue(of(periods));
+      companyService.getHistory.mockReturnValue(of([]));
+      companyService.getFinancialPeriod.mockReturnValue(of(financial));
+
+      fixture = TestBed.createComponent(Dashboard);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    }
+
+    it('saves selections as the user makes them', () => {
+      component.companies = [{ label: 'Senus PLC', value: 1 }];
+      companyService.getPeriods.mockReturnValue(of(periods));
+      companyService.getFinancialPeriod.mockReturnValue(of(financial));
+
+      component.onCompanySelected({ label: 'Senus PLC', value: 1 });
+      component.onPeriodSelected({ label: 'FY 2025', value: 'FY2025' });
+      component.onComparePeriodSelected({ label: 'FY 2024', value: 'FY2024' });
+      component.onInsightOpenChange(true);
+
+      expect(loadDashboardState()).toEqual({
+        companyId: 1, period: 'FY2025', comparePeriod: 'FY2024', insightOpen: true
+      });
+    });
+
+    it('restores company, period, comparison and the insight panel', () => {
+      restart({ companyId: 1, period: 'FY2025', comparePeriod: 'FY2024', insightOpen: true });
+
+      expect(component.selectedCompany?.value).toBe(1);
+      expect(component.selectedPeriod?.value).toBe('FY2025');
+      expect(component.selectedComparePeriod?.value).toBe('FY2024');
+      expect(component.insightOpen).toBe(true);
+      expect(companyService.getFinancialPeriod).toHaveBeenLastCalledWith(1, 'FY2025', 'FY2024');
+    });
+
+    it('drops a stale company id gracefully', () => {
+      restart({ companyId: 99, period: 'FY2025', comparePeriod: null, insightOpen: true });
+
+      expect(component.selectedCompany).toBeNull();
+      expect(companyService.getPeriods).not.toHaveBeenCalled();
+      expect(loadDashboardState().companyId).toBeNull();
+    });
+
+    it('keeps the company but drops a stale period and comparison', () => {
+      restart({ companyId: 1, period: 'FY2019', comparePeriod: 'FY2018', insightOpen: true });
+
+      expect(component.selectedCompany?.value).toBe(1);
+      expect(component.selectedPeriod).toBeNull();
+      expect(component.insightOpen).toBe(false);
+      expect(loadDashboardState()).toEqual({
+        companyId: 1, period: null, comparePeriod: null, insightOpen: false
+      });
+    });
   });
 });
