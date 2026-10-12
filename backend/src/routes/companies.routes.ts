@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { AppError } from "../utils/errors";
+import { AppError, logServerError } from "../utils/errors";
 import { PERIOD_PATTERN } from "../utils/report-validator";
 import { getCompanies,getCompanyPeriods,getFinancialPeriod,getCompanyHistory} from "../services/companies.service";
 
@@ -70,10 +70,7 @@ function handleError(res: Response, error: unknown) {
         return sendError(res, error.status, error.message);
     }
 
-    console.error(
-        `[companies] request failed request=${res.locals.requestId}`,
-        error
-    );
+    logServerError("companies", res.locals.requestId, error);
 
     return sendError(res, 500, "Failed to retrieve company data.");
 }

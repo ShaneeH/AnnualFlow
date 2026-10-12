@@ -81,9 +81,18 @@ export async function analysePDF(
         schema: financialReportSchema
       }
     },
-    max_output_tokens: 8_000,
+    // Reasoning models (e.g. gpt-5) spend part of this budget on reasoning,
+    // so it must leave room for the JSON answer itself.
+    max_output_tokens: 16_000,
     store: false
   });
+
+  if (response.status === "incomplete") {
+    const reason = response.incomplete_details?.reason ?? "unknown";
+    throw new AnalysisServiceError(
+      `The analysis stopped before finishing (${reason}). Please try again.`
+    );
+  }
 
   if (!response.output_text) {
     throw new AnalysisServiceError("The analysis service returned an empty response.");
@@ -115,9 +124,16 @@ export async function generateStructuredJson(options: {
         schema: options.schema
       }
     },
-    max_output_tokens: options.maxOutputTokens ?? 4_000,
+    max_output_tokens: options.maxOutputTokens ?? 8_000,
     store: false
   });
+
+  if (response.status === "incomplete") {
+    const reason = response.incomplete_details?.reason ?? "unknown";
+    throw new AnalysisServiceError(
+      `The insight stopped before finishing (${reason}). Please try again.`
+    );
+  }
 
   if (!response.output_text) {
     throw new AnalysisServiceError("The insight service returned an empty response.");

@@ -8,6 +8,7 @@ import companiesRouter from "./routes/companies.routes";
 import insightsRouter from "./routes/insights.routes";
 
 import { apiLimiter } from "./middleware/rate-limit";
+import { logServerError } from "./utils/errors";
 import {
     getAllowedOrigins,
     requestContext,
@@ -128,10 +129,7 @@ app.use((
         return;
     }
 
-    console.error(
-        `[http] unhandled request=${res.locals.requestId}`,
-        error
-    );
+    logServerError("http] [unhandled", res.locals.requestId, error);
 
     res.status(500).json({
         success: false,

@@ -34,6 +34,7 @@ import {
     AppError,
     NotFinancialReportError,
     ServiceConfigError,
+    logServerError,
     toUpstreamAppError
 } from "../utils/errors";
 import { parseAndValidateReport } from "../utils/report-validator";
@@ -97,10 +98,48 @@ function logRouteError(
     context: string,
     error: unknown
 ): void {
-    console.error(
-        `[reports] ${context} request=${res.locals.requestId}`,
-        error
-    );
+    logServerError(`reports] [${context}`, res.locals.requestId, error);
+}
+
+/**
+ * Maps any upload-processing failure to an HTTP status and a specific,
+ * user-facing message. Exported for tests.
+ */
+export function uploadErrorResponse(error: unknown): {
+    status: number;
+    body: { error: string; code?: string };
+} {
+    if (error instanceof DuplicateDocumentError) {
+        return { status: 409, body: { error: error.message, code: "DUPLICATE_DOCUMENT" } };
+    }
+
+    if (error instanceof PdfUploadError) {
+        return { status: error.status, body: { error: error.message } };
+    }
+
+    if (error instanceof NotFinancialReportError) {
+        return { status: 422, body: { error: error.message, code: "NOT_FINANCIAL_REPORT" } };
+    }
+
+    if (error instanceof ServiceConfigError) {
+        return {
+            status: 503,
+            body: { error: "The document analysis service is not configured (OPENAI_API_KEY is missing)." }
+        };
+    }
+
+    const appError = error instanceof AppError ? error : toUpstreamAppError(error);
+    if (appError) {
+        return { status: appError.status, body: { error: appError.message } };
+    }
+
+    return {
+        status: 500,
+        body: {
+            error: "The document could not be processed due to an unexpected server error. " +
+                "The server log has the details for this request ID."
+        }
+    };
 }
 
 function uploadSinglePdf(
@@ -304,45 +343,25 @@ router.post(
         } catch (error) {
             progress.fail("Document processing failed");
 
-            if (error instanceof DuplicateDocumentError) {
-                return sendError(res, 409, error.message);
-            }
-            if (error instanceof PdfUploadError) {
-                return sendError(res, error.status, error.message);
-            }
-
-            const appError = error instanceof AppError
-                ? error
-                : toUpstreamAppError(error);
-
-            if (error instanceof NotFinancialReportError) {
-                return res.status(422).json({
-                    success: false,
-                    error: error.message,
-                    code: "NOT_FINANCIAL_REPORT",
-                    requestId: res.locals.requestId
-                });
+            if (
+                !(error instanceof DuplicateDocumentError) &&
+                !(error instanceof PdfUploadError)
+            ) {
+                logRouteError(
+                    res,
+                    error instanceof NotFinancialReportError
+                        ? "rejected non-financial document"
+                        : "processing failed",
+                    error
+                );
             }
 
-            if (appError && appError.status < 500) {
-                return sendError(res, appError.status, appError.message);
-            }
-
-            logRouteError(res, "processing failed", error);
-
-            if (error instanceof ServiceConfigError) {
-                return sendError(res, 503, "The document analysis service is not configured.");
-            }
-
-            if (appError) {
-                return sendError(res, appError.status, appError.message);
-            }
-
-            return sendError(
-                res,
-                500,
-                "The document could not be processed. Check the request ID in the server logs."
-            );
+            const { status, body } = uploadErrorResponse(error);
+            return res.status(status).json({
+                success: false,
+                ...body,
+                requestId: res.locals.requestId
+            });
         }
     }
 );

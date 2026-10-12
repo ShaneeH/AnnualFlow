@@ -7,7 +7,7 @@ import {
     getInsight,
     InsightDeps
 } from "../services/insights.service";
-import { AppError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
+import { AppError, logServerError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
 import { PERIOD_PATTERN } from "../utils/report-validator";
 
 const MAX_ID = 2_147_483_647;
@@ -33,22 +33,18 @@ function parseParams(req: Request): { companyId: number; period: string } | null
 }
 
 function handleError(res: Response, error: unknown) {
-    const appError = error instanceof AppError ? error : toUpstreamAppError(error);
+    logServerError("insights", res.locals.requestId, error);
 
     if (error instanceof ServiceConfigError) {
-        console.error(`[insights] not configured request=${res.locals.requestId}`);
-        return sendError(res, 503, "The AI insight service is not configured.");
+        return sendError(res, 503, "The AI insight service is not configured (OPENAI_API_KEY is missing).");
     }
 
+    const appError = error instanceof AppError ? error : toUpstreamAppError(error);
     if (appError) {
-        if (appError.status >= 500) {
-            console.error(`[insights] request failed request=${res.locals.requestId}`, error);
-        }
         return sendError(res, appError.status, appError.message);
     }
 
-    console.error(`[insights] request failed request=${res.locals.requestId}`, error);
-    return sendError(res, 500, "The AI insight could not be generated.");
+    return sendError(res, 500, "The AI insight could not be generated. Check the server logs for this request ID.");
 }
 
 /** Factory so tests can inject fake dependencies. */
