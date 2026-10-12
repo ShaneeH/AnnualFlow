@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "db:migrate": "npm run build && node dist/database/migrate.js",
     "test": "npm run build && node --require ./dist/test-setup.js --test dist/*.test.js dist/**/*.test.js",
-    "check": "npm test"
+    "check": "npm test",
+    "db:seed:demo": "npm run build && node dist/database/seed-demo.js"
   },
   "keywords": [],
   "author": "",

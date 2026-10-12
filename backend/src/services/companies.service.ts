@@ -8,10 +8,12 @@ export async function getCompanies() {
     const result = await db.query(
         `
         SELECT
-            company_id AS "companyId",
-            company_name AS "companyName"
-        FROM companies
-        ORDER BY company_name;
+            c.company_id AS "companyId",
+            c.company_name AS "companyName",
+            -- Read via JSONB so this works before migration 004 adds is_demo.
+            COALESCE((to_jsonb(c) ->> 'is_demo')::boolean, FALSE) AS "isDemo"
+        FROM companies c
+        ORDER BY c.company_name;
         `
     );
 
