@@ -195,4 +195,23 @@ describe('AddDocument', () => {
     expect(card?.textContent).toContain('Not a financial report');
     expect(card?.textContent).toContain('Nothing was saved');
   });
+
+  it('should show the backend message for AI service errors, not a generic one', () => {
+    component.selectedFile = new File(['%PDF-'], 'report.pdf', { type: 'application/pdf' });
+    companyService.addDocument.mockReturnValue(
+      throwError(() => new HttpErrorResponse({
+        status: 502,
+        error: {
+          success: false,
+          error: "The AI service rejected the request: Invalid schema for response_format 'financial_report'.",
+          requestId: 'req-9'
+        }
+      }))
+    );
+
+    component.uploadDocument();
+
+    expect(component.errorMessage).toContain('Invalid schema');
+    expect(component.rejectionMessage).toBeNull();
+  });
 });
