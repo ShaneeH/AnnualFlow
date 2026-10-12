@@ -1,0 +1,171 @@
+<main class="landing">
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-text">
+      <p class="eyebrow">AI financial report intelligence</p>
+      <h1 id="hero-title">Turn financial report PDFs into <span class="gradient">board-ready insight</span>.</h1>
+      <p class="lead">
+        Report Hub reads company reports and validates every figure. It merges each new document into one
+        enriched record per company and period, then gives you KPIs, charts, an AI briefing and a board PDF.
+      </p>
+      <div class="cta-row">
+        <a routerLink="/documents/new" class="btn btn-primary">＋ Create new report</a>
+        <button type="button" class="btn btn-secondary" (click)="openDemo()" [disabled]="isOpeningDemo">
+          {{ isOpeningDemo ? 'Opening demo…' : 'Try the demo →' }}
+        </button>
+      </div>
+      <p class="hero-note">The demo uses Northwind Analytics plc, a fictional company.</p>
+    </div>
+
+    <!-- Animated KPI preview (pure CSS/SVG) -->
+    <div class="preview" aria-hidden="true">
+      <div class="preview-card">
+        <div class="preview-head">
+          <span>Northwind Analytics plc · FY2025</span>
+          <span class="pill">Enriched</span>
+        </div>
+        <div class="preview-kpis">
+          <div class="kpi"><span>Revenue</span><strong>€248.6m</strong><em class="up">▲ 18.0%</em></div>
+          <div class="kpi"><span>Net margin</span><strong>14.1%</strong><em class="up">▲ 2.5 pts</em></div>
+          <div class="kpi"><span>EPS</span><strong>€0.88</strong><em class="up">▲ 44%</em></div>
+        </div>
+        <div class="preview-chart">
+          @for (bar of previewBars; track bar.label; let i = $index) {
+            <div class="bar-col">
+              <div class="bar" [style.height.%]="bar.height" [style.animation-delay.ms]="i * 120"></div>
+              <span>{{ bar.label }}</span>
+            </div>
+          }
+          <svg class="trend" viewBox="0 0 100 40" preserveAspectRatio="none">
+            <polyline points="0,30 33,24 66,17 100,6" />
+          </svg>
+        </div>
+      </div>
+      <div class="float-chip chip-a">✓ 6 periods validated</div>
+      <div class="float-chip chip-b">🤖 AI Insight ready</div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" aria-labelledby="features-title">
+    <p class="eyebrow">Features</p>
+    <h2 id="features-title">Everything between the PDF and the board meeting</h2>
+    <div class="feature-grid">
+      @for (feature of features; track feature.title) {
+        <article class="feature" [class.feature-highlight]="feature.highlight">
+          <span class="feature-icon" aria-hidden="true">{{ feature.icon }}</span>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- Data Enrichment -->
+  <section class="section enrichment" id="data-enrichment" aria-labelledby="enrichment-title">
+    <p class="eyebrow">Headline feature</p>
+    <h2 id="enrichment-title">How Data Enrichment works</h2>
+    <p class="section-lead">
+      Upload more documents for the same company and period and Report Hub enriches the record you already have.
+      It never creates a second copy.
+    </p>
+
+    <ol class="enrich-flow">
+      <li class="enrich-step">
+        <span class="step-tag">1 · First upload</span>
+        <h3>FY2024 results PDF</h3>
+        <table class="mini-table">
+          <caption class="visually-hidden">Figures after the first upload</caption>
+          <tbody>
+            <tr><th scope="row">Revenue</th><td>€210.7m</td></tr>
+            <tr><th scope="row">Net profit</th><td>€24.4m</td></tr>
+            <tr><th scope="row">Cash</th><td class="gap">-</td></tr>
+            <tr><th scope="row">EPS</th><td class="gap">-</td></tr>
+          </tbody>
+        </table>
+      </li>
+      <li class="enrich-arrow" aria-hidden="true">→</li>
+      <li class="enrich-step">
+        <span class="step-tag">2 · Later upload</span>
+        <h3>FY2024 annual report</h3>
+        <table class="mini-table">
+          <caption class="visually-hidden">Figures in the second document</caption>
+          <tbody>
+            <tr><th scope="row">Revenue</th><td>€210.7m</td></tr>
+            <tr><th scope="row">Net profit</th><td class="changed">€24.6m</td></tr>
+            <tr><th scope="row">Cash</th><td class="new">€48.9m</td></tr>
+            <tr><th scope="row">EPS</th><td class="new">€0.61</td></tr>
+          </tbody>
+        </table>
+      </li>
+      <li class="enrich-arrow" aria-hidden="true">→</li>
+      <li class="enrich-step enrich-result">
+        <span class="step-tag">3 · One enriched record</span>
+        <h3>FY2024 · 2 source documents</h3>
+        <table class="mini-table">
+          <caption class="visually-hidden">Merged FY2024 record</caption>
+          <tbody>
+            <tr><th scope="row">Revenue</th><td>€210.7m</td></tr>
+            <tr><th scope="row">Net profit</th><td class="changed">€24.6m <span class="flag">conflict flagged</span></td></tr>
+            <tr><th scope="row">Cash</th><td class="new">€48.9m <span class="flag flag-new">gap filled</span></td></tr>
+            <tr><th scope="row">EPS</th><td class="new">€0.61 <span class="flag flag-new">gap filled</span></td></tr>
+          </tbody>
+        </table>
+      </li>
+    </ol>
+
+    <ul class="enrich-facts">
+      <li><strong>Gaps filled:</strong> new figures fill empty fields. A missing value in a later document never erases a stored one.</li>
+      <li><strong>Conflicts flagged:</strong> if a figure differs, the newer document's value is kept and the upload reports the old and new values.</li>
+      <li><strong>Traceable:</strong> every period remembers each document that contributed to it.</li>
+    </ul>
+    <a routerLink="/about" fragment="data-enrichment" class="text-link">Read more about Data Enrichment →</a>
+  </section>
+
+  <!-- How it works -->
+  <section class="section" aria-labelledby="how-title">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-title">From PDF to dashboard in four steps</h2>
+    <ol class="steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="step">
+          <span class="step-number">{{ i + 1 }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <!-- Tech / trust strip -->
+  <section class="trust" aria-label="Technology and engineering">
+    <ul class="stack">
+      @for (item of stack; track item) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+    <p class="trust-line">
+      Validated AI output · SHA-256 duplicate detection · Transactional writes · Rate limiting · Idempotent migrations · CI tested
+    </p>
+  </section>
+
+  <!-- Final CTA + footer -->
+  <section class="final-cta">
+    <h2>See it with real numbers</h2>
+    <div class="cta-row">
+      <a routerLink="/documents/new" class="btn btn-primary">＋ Create new report</a>
+      <button type="button" class="btn btn-secondary" (click)="openDemo()" [disabled]="isOpeningDemo">Try the demo →</button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Report Hub, built by Shane Hahesy</span>
+    <nav aria-label="Footer">
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/documents">My Reports</a>
+      <a routerLink="/about">About</a>
+      <a href="https://github.com/ShaneeH/senus-board-reporting" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+    <span class="footer-note">AI-generated content is not financial advice. Demo figures are fictional.</span>
+  </footer>
+</main>

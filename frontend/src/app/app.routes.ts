@@ -11,7 +11,9 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard'
+        loadComponent: () =>
+          import('./features/landing/landing').then(m => m.Landing),
+        title: 'Report Hub | AI financial report intelligence'
       },
 
       {
