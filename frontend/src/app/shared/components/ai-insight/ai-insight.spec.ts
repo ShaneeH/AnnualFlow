@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { ApiError } from '../../../core/interceptors/api-error.interceptor';
 import { AiInsight } from '../../../core/models/ai-insight.model';
 import { InsightService } from '../../../core/services/insight.service';
-import { AiInsightComponent } from './ai-insight';
+import { AiInsightComponent, formatInsightText } from './ai-insight';
 
 const insight: AiInsight = {
   companyId: 1,
@@ -144,5 +144,54 @@ describe('AiInsightComponent', () => {
     fixture.detectChanges();
 
     expect(el().querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('formats the whole insight as plain text', () => {
+    const text = formatInsightText(insight, 'WWE', 'FY 2025');
+
+    expect(text).toContain('AI Insight: WWE (FY 2025)');
+    expect(text).toContain('PERFORMANCE SUMMARY\nRevenue reached 1.8bn.');
+    expect(text).toContain('WHERE THEY COULD IMPROVE\n- Improve cash conversion.');
+    expect(text).toContain('RISKS TO WATCH\n- Watch leverage.');
+    expect(text).toContain('AI-generated, not financial advice');
+  });
+
+  it('copies via navigator.clipboard and shows Copied! feedback', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    service.getInsight.mockReturnValue(of(insight));
+    component.open();
+    fixture.detectChanges();
+
+    await component.copy();
+    fixture.detectChanges();
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('AI Insight: WWE'));
+    expect(el().querySelector('.copy-button')?.textContent).toContain('Copied!');
+  });
+
+  it('falls back to execCommand when the Clipboard API is unavailable', async () => {
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    const exec = vi.fn().mockReturnValue(true);
+    (document as any).execCommand = exec;
+    service.getInsight.mockReturnValue(of(insight));
+    component.open();
+
+    await component.copy();
+
+    expect(exec).toHaveBeenCalledWith('copy');
+    expect(component.copied).toBe(true);
+  });
+
+  it('opens immediately when initiallyOpen is set and reports open/close', () => {
+    const changes: boolean[] = [];
+    component.openChange.subscribe(value => changes.push(value));
+    service.getInsight.mockReturnValue(of(insight));
+
+    fixture.componentRef.setInput('initiallyOpen', true);
+    component.ngOnInit();
+    component.close();
+
+    expect(changes).toEqual([true, false]);
   });
 });

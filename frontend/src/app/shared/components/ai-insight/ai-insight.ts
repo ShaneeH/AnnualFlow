@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, HostListener, OnChanges, SimpleChanges, inject, input } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnChanges, OnDestroy, OnInit, SimpleChanges, inject, input, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subscription, forkJoin, map, timer } from 'rxjs';
 
@@ -25,6 +25,64 @@ export const INSIGHT_SECTIONS: readonly InsightSection[] = [
   { key: 'risks', title: 'Risks to watch', icon: '⚠️' }
 ];
 
+export const INSIGHT_DISCLAIMER =
+  'AI-generated, not financial advice. External factors are plausible influences, not confirmed causes.';
+
+/** Formats an insight as readable plain text for the clipboard. */
+export function formatInsightText(
+  insight: AiInsight,
+  companyName: string,
+  periodLabel: string
+): string {
+  const lines: string[] = [
+    `AI Insight: ${companyName || 'Company'}${periodLabel ? ` (${periodLabel})` : ''}`,
+    '',
+    'PERFORMANCE SUMMARY',
+    insight.content.performanceSummary
+  ];
+
+  for (const section of INSIGHT_SECTIONS) {
+    const points = insight.content[section.key];
+    if (!points.length) continue;
+
+    lines.push('', section.title.toUpperCase(), ...points.map(point => `- ${point}`));
+  }
+
+  lines.push('', `Generated ${insight.generatedAt} (${insight.model})`, INSIGHT_DISCLAIMER);
+
+  return lines.join('\n');
+}
+
+/** Copies text using the async Clipboard API, falling back to execCommand. */
+export async function copyText(text: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall through to the legacy approach (e.g. insecure context).
+  }
+
+  if (typeof document === 'undefined') return false;
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
 /** Robot button + slide-out panel with an AI insight for one company period. */
 @Component({
   selector: 'app-ai-insight',
@@ -33,7 +91,7 @@ export const INSIGHT_SECTIONS: readonly InsightSection[] = [
   templateUrl: './ai-insight.html',
   styleUrl: './ai-insight.css'
 })
-export class AiInsightComponent implements OnChanges {
+export class AiInsightComponent implements OnInit, OnChanges, OnDestroy {
   private readonly insightService = inject(InsightService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -41,6 +99,15 @@ export class AiInsightComponent implements OnChanges {
   readonly period = input.required<string>();
   readonly companyName = input<string>('');
   readonly periodLabel = input<string>('');
+  /** Open the panel immediately (used to restore dashboard state). */
+  readonly initiallyOpen = input<boolean>(false);
+  /** Emits whenever the panel opens or closes. */
+  readonly openChange = output<boolean>();
+
+  readonly disclaimer = INSIGHT_DISCLAIMER;
+  copied = false;
+  copyFailed = false;
+  private copiedTimer?: ReturnType<typeof setTimeout>;
 
   /** Minimum time the "thinking" animation is shown (ms). Tests set 0. */
   minThinkingMs = 900;
@@ -54,6 +121,28 @@ export class AiInsightComponent implements OnChanges {
 
   private request?: Subscription;
 
+  ngOnInit(): void {
+    if (this.initiallyOpen()) this.open();
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.copiedTimer);
+  }
+
+  async copy(): Promise<void> {
+    if (!this.insight) return;
+
+    const ok = await copyText(formatInsightText(this.insight, this.companyName(), this.periodLabel()));
+    this.copied = ok;
+    this.copyFailed = !ok;
+
+    clearTimeout(this.copiedTimer);
+    this.copiedTimer = setTimeout(() => {
+      this.copied = false;
+      this.copyFailed = false;
+    }, 2000);
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     // A different company/period invalidates whatever is shown.
     if (changes['companyId'] || changes['period']) {
@@ -66,11 +155,13 @@ export class AiInsightComponent implements OnChanges {
   }
 
   open(): void {
+    if (!this.isOpen) this.openChange.emit(true);
     this.isOpen = true;
     if (this.state === 'idle' || this.state === 'error') this.load();
   }
 
   close(): void {
+    if (this.isOpen) this.openChange.emit(false);
     this.isOpen = false;
   }
 

@@ -43,6 +43,7 @@
     </header>
 
     <div class="panel-body" aria-live="polite">
+      <span class="visually-hidden" aria-live="polite">{{ copied ? 'Insight copied to clipboard' : '' }}</span>
       @switch (state) {
         @case ('loading') {
           <p class="panel-status">Loading…</p>
@@ -102,9 +103,14 @@
     </div>
 
     <footer class="panel-footer">
-      <p class="disclaimer">AI-generated, not financial advice. External factors are plausible influences, not confirmed causes.</p>
+      <p class="disclaimer">{{ disclaimer }}</p>
       @if (state === 'ready') {
-        <button type="button" class="secondary-button" (click)="generate(true)">↻ Regenerate</button>
+        <div class="footer-actions">
+          <button type="button" class="secondary-button copy-button" (click)="copy()" [attr.aria-label]="copied ? 'Copied' : 'Copy insight'">
+            {{ copied ? '✓ Copied!' : copyFailed ? 'Copy failed' : '⧉ Copy' }}
+          </button>
+          <button type="button" class="secondary-button" (click)="generate(true)">↻ Regenerate</button>
+        </div>
       }
     </footer>
   </aside>
