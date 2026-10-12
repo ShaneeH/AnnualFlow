@@ -80,6 +80,14 @@
           <div class="report-field">
             <span class="report-label">Reporting Period</span>
             <h2>{{ financialPeriod.financials.periodLabel }}</h2>
+            @if (sourceDocumentCount > 0) {
+              <p class="source-meta">
+                <span>Sources: {{ sourceDocumentCount }} {{ sourceDocumentCount === 1 ? 'document' : 'documents' }}</span>
+                @if (sourceDocumentCount > 1) {
+                  <span class="enriched-badge" title="Figures merged from several uploaded documents (Data Enrichment)">Enriched</span>
+                }
+              </p>
+            }
           </div>
         </div>
 

@@ -16,6 +16,16 @@ describe('About', () => {
     fixture.detectChanges();
   });
 
+  it('explains Data Enrichment with an example table', () => {
+    const section: HTMLElement = fixture.nativeElement.querySelector('#data-enrichment');
+    expect(section).toBeTruthy();
+    expect(section.textContent).toContain('COALESCE(new, existing)');
+    expect(section.textContent).toContain('conflicts[]');
+    expect(section.textContent).toContain('document_periods');
+    expect(section.textContent).toContain('Single source of truth');
+    expect(section.querySelectorAll('tbody tr').length).toBe(5);
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
