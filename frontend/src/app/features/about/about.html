@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <main class="page">
 
   <section class="hero">
@@ -232,3 +233,108 @@
 
 
 </main>
+=======
+<main class="about">
+  <section class="intro" aria-labelledby="about-title">
+    <h1 id="about-title">About Annualflow</h1>
+    <p class="lead">
+      An open source project by Shane Hahesy that turns financial report PDFs into structured data.
+    </p>
+    <p>
+      The <a routerLink="/">home page</a> gives an overview of what it does. This page covers how it is
+      built, and the design decisions behind it. It also explains how to get involved.
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="architecture-title">
+    <h2 id="architecture-title">Architecture</h2>
+    <ol class="plain-list numbered">
+      <li>
+        <strong>Upload.</strong> The Express API checks the file's type, size and PDF signature. It then
+        hashes the bytes with SHA-256 and refuses files it has already seen.
+      </li>
+      <li>
+        <strong>Extraction.</strong> The PDF goes to the OpenAI Responses API with a strict JSON schema. The
+        model also classifies the document, so a CV or invoice is identified as not being a report.
+      </li>
+      <li>
+        <strong>Validation.</strong> The server re-checks everything the model returned: types, period
+        codes, plausible values and at least one core metric. Anything that fails is rejected with a clear
+        message, and nothing is written.
+      </li>
+      <li>
+        <strong>Storage.</strong> The company, document, periods and links are written to PostgreSQL in a
+        single transaction.
+      </li>
+      <li>
+        <strong>Processing mode.</strong> Uploads run as background jobs on long-running hosts
+        (<code>JOB_MODE=async</code>), or inside the request on serverless hosts (<code>JOB_MODE=sync</code>).
+      </li>
+    </ol>
+  </section>
+
+  <section class="section" id="data-enrichment" aria-labelledby="enrichment-title">
+    <h2 id="enrichment-title">Data Enrichment: implementation notes</h2>
+    <ul class="plain-list">
+      <li>Companies are matched by name, ignoring case. Periods are matched by <code>(company, period)</code>.</li>
+      <li>
+        Each field is updated with <code>COALESCE(new, existing)</code>. Incoming values replace stored
+        ones, and a missing value never erases a stored one.
+      </li>
+      <li>
+        Before the update, fields where both values exist and differ are returned to the client as
+        <code>conflicts[]</code>, with the previous and new values.
+      </li>
+      <li>
+        The <code>document_periods</code> table links each period to every document that contributed to it.
+        The dashboard shows this as the number of sources.
+      </li>
+      <li>
+        Margins and ratios are recalculated from the merged figures, and the period's cached Insights are
+        cleared.
+      </li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="decisions-title">
+    <h2 id="decisions-title">Design decisions</h2>
+    <ul class="plain-list">
+      <li><strong>Calculations in code.</strong> The model only extracts reported figures. Margins, ratios and changes are calculated deterministically and covered by tests.</li>
+      <li><strong>AI output is treated as untrusted input.</strong> It is validated twice: by the schema and again on the server.</li>
+      <li><strong>Grounded summaries.</strong> Insights only receive the stored figures and is told not to invent numbers.</li>
+      <li><strong>Idempotent migrations.</strong> Numbered SQL files run under an advisory lock, so re-running them is safe.</li>
+      <li><strong>Rate limiting</strong> on uploads and AI requests, and typed errors with request IDs in the logs.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="stack-title">
+    <h2 id="stack-title">Tech stack</h2>
+    <dl class="stack">
+      <div><dt>Frontend</dt><dd>Angular 21, RxJS, Chart.js, jsPDF, Vitest</dd></div>
+      <div><dt>Backend</dt><dd>Node.js, Express 5, TypeScript, Multer, node:test</dd></div>
+      <div><dt>Data</dt><dd>PostgreSQL with SQL migrations</dd></div>
+      <div><dt>AI</dt><dd>OpenAI Responses and Files APIs with structured output</dd></div>
+      <div><dt>Tooling</dt><dd>GitHub Actions CI</dd></div>
+    </dl>
+  </section>
+
+  <section class="section contribute" id="contributing" aria-labelledby="contributing-title">
+    <h2 id="contributing-title">Get involved</h2>
+    <p>
+      Annualflow is open source, and help or feedback of any size is welcome.
+    </p>
+    <ul class="plain-list">
+      <li>If you find it useful, <a [href]="repoUrl" target="_blank" rel="noopener noreferrer">star the repository on GitHub</a>.</li>
+      <li><strong>Spotted a bug?</strong> Just email me at <a href="mailto:s.hahesy@outlook.com">s.hahesy&#64;outlook.com</a>.</li>
+      <li>Found a bug or have an idea? <a [href]="issuesUrl" target="_blank" rel="noopener noreferrer">Open an issue</a>.</li>
+      <li>Want to fix or improve something? Fork the repo and open a pull request. The README explains how to set it up and run the tests.</li>
+    </ul>
+    <p>You can also reach me directly:</p>
+    <ul class="contact">
+      <li><span>Email</span> <a href="mailto:s.hahesy@outlook.com">s.hahesy&#64;outlook.com</a></li>
+      <li><span>LinkedIn</span> <a href="https://linkedin.com/in/shane-hahesy" target="_blank" rel="noopener noreferrer">linkedin.com/in/shane-hahesy</a></li>
+      <li><span>GitHub</span> <a href="https://github.com/ShaneeH" target="_blank" rel="noopener noreferrer">github.com/ShaneeH</a></li>
+    </ul>
+  </section>
+</main>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

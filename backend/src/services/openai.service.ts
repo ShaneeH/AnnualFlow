@@ -81,10 +81,26 @@ export async function analysePDF(
         schema: financialReportSchema
       }
     },
+<<<<<<< HEAD
     max_output_tokens: 8_000,
     store: false
   });
 
+=======
+    // Reasoning models (e.g. gpt-5) spend part of this budget on reasoning,
+    // so it must leave room for the JSON answer itself.
+    max_output_tokens: 16_000,
+    store: false
+  });
+
+  if (response.status === "incomplete") {
+    const reason = response.incomplete_details?.reason ?? "unknown";
+    throw new AnalysisServiceError(
+      `The analysis stopped before finishing (${reason}). Please try again.`
+    );
+  }
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   if (!response.output_text) {
     throw new AnalysisServiceError("The analysis service returned an empty response.");
   }
@@ -92,6 +108,50 @@ export async function analysePDF(
   return response.output_text;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Text-only structured generation (no files, no tools, no web search).
+ * Returns the raw JSON text; callers must validate it.
+ */
+export async function generateStructuredJson(options: {
+  instructions: string;
+  input: string;
+  schemaName: string;
+  schema: Record<string, unknown>;
+  maxOutputTokens?: number;
+}): Promise<{ text: string; model: string }> {
+  const response = await getClient().responses.create({
+    model: MODEL,
+    instructions: options.instructions,
+    input: options.input,
+    text: {
+      format: {
+        type: "json_schema",
+        name: options.schemaName,
+        strict: true,
+        schema: options.schema
+      }
+    },
+    max_output_tokens: options.maxOutputTokens ?? 8_000,
+    store: false
+  });
+
+  if (response.status === "incomplete") {
+    const reason = response.incomplete_details?.reason ?? "unknown";
+    throw new AnalysisServiceError(
+      `The insight stopped before finishing (${reason}). Please try again.`
+    );
+  }
+
+  if (!response.output_text) {
+    throw new AnalysisServiceError("The insight service returned an empty response.");
+  }
+
+  return { text: response.output_text, model: MODEL };
+}
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 export async function uploadPDF(
   pdf: Buffer,
   originalName = "financial-report.pdf"

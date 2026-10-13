@@ -30,6 +30,14 @@
 .dashboard-header {
   margin-bottom: clamp(1.75rem, 4vw, 3rem);
   position: relative;
+<<<<<<< HEAD
+=======
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 
@@ -108,16 +116,34 @@
   padding: clamp(1.25rem, 3vw, 2rem);
   margin-bottom: 2rem;
   position: relative;
+<<<<<<< HEAD
   overflow: hidden;
 }
 
+=======
+  /* Visible so the Export menu can drop over the cards below. */
+  overflow: visible;
+  z-index: 5;
+}
+
+/* The insights panel renders inside the dashboard's isolated stacking context;
+   lift that context above the sticky navbar (1000) while the panel is open. */
+.dashboard:has(.insight-panel) { z-index: 1100; }
+.report-header:has(.insight-panel) { z-index: 1100; }
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 /* gradient hairline replaces the flat top border */
 .report-header::before {
   content: '';
   position: absolute;
   top: 0;
+<<<<<<< HEAD
   left: 0;
   right: 0;
+=======
+  left: var(--radius-medium);
+  right: var(--radius-medium);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   opacity: 0.55;
@@ -158,6 +184,7 @@
   font-variant-numeric: tabular-nums;
 }
 
+<<<<<<< HEAD
 /* company name gets the hero treatment — subtle orange-tinted gradient */
 .report-header-main > div:first-child h2 {
   background: linear-gradient(135deg, var(--primary) 55%, var(--accent) 160%);
@@ -192,6 +219,9 @@
   max-width: 160px;
   font-variant-numeric: tabular-nums;
 }
+=======
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 @media (max-width: 560px) {
   .report-header {
@@ -206,9 +236,12 @@
     gap: 1rem;
   }
 
+<<<<<<< HEAD
   .compare-pill {
     align-self: flex-start;
   }
+=======
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 /* ---------- KPI grid ---------- */
@@ -380,3 +413,139 @@
 .dashboard-status {
   opacity: 0.8;
 }
+<<<<<<< HEAD
+=======
+
+.report-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  width: 13.5rem;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .report-header-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.source-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.enriched-text {
+  color: #6fcf8f;
+  font-weight: 500;
+}
+
+/* Charts: even 2x2 grid; a lone last chart spans the row so the grid stays tidy. */
+.history-chart-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.history-chart-card app-cash-flow-chart,
+.history-chart-card app-margins-chart {
+  display: block;
+  width: 100%;
+}
+
+.history-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.period-kind-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+}
+
+.period-kind-toggle button {
+  padding: 0.45rem 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--secondary);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.period-kind-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+
+.period-kind-toggle button.active {
+  background: var(--surface-light);
+  color: var(--primary);
+}
+
+.period-kind-toggle button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Narrow screens: let long company names wrap instead of clipping. */
+@media (max-width: 640px) {
+  .report-header-main > .report-field:first-child h2 {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Export menu: one square button with grouped PDF / JSON options. */
+.export-menu { position: relative; }
+.export-trigger { width: 100%; display: flex; align-items: center; }
+.export-trigger-label { flex: 1; }
+.export-trigger .chevron { width: 0.9rem; height: 0.9rem; transition: transform 0.15s ease; }
+.export-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.export-menu-list {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface, #1a1a1f);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.export-group + .export-group { margin-top: 0.25rem; padding-top: 0.25rem; border-top: 1px solid var(--border); }
+.export-group-label {
+  display: block;
+  padding: 0.3rem 0.6rem 0.15rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.export-item {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.export-item:hover, .export-item:focus-visible { background: rgba(255, 255, 255, 0.06); outline: none; }
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

@@ -1,3 +1,16 @@
+<<<<<<< HEAD
 <app-add-document (documentAdded)="viewDocuments.loadDocuments()" />
 
 <app-view-documents #viewDocuments />
+=======
+<section class="documents-page">
+  <div class="documents-toolbar">
+    <a routerLink="/documents/new" class="create-report-button">
+      <span aria-hidden="true">＋</span>
+      Add new report
+    </a>
+  </div>
+
+  <app-view-documents />
+</section>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

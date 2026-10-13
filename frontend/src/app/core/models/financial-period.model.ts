@@ -8,6 +8,13 @@ export interface FinancialComparison {
     debtGrowth: number | null;
     customerGrowth: number | null;
     netAssetGrowth: number | null;
+<<<<<<< HEAD
+=======
+    operatingCashFlowGrowth?: number | null;
+    totalAssetsGrowth?: number | null;
+    totalLiabilitiesGrowth?: number | null;
+    epsGrowth?: number | null;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 export interface FinancialPeriod {
@@ -28,6 +35,16 @@ export interface FinancialPeriod {
         debt: number | null;
         customers: number | null;
         netAssets: number | null;
+<<<<<<< HEAD
+=======
+        operatingCashFlow?: number | null;
+        totalAssets?: number | null;
+        totalLiabilities?: number | null;
+        eps?: number | null;
+
+        // Data Enrichment: number of documents merged into this period record.
+        sourceDocumentCount?: number;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     };
 
     metrics: {
@@ -40,6 +57,15 @@ export interface FinancialPeriod {
         revenuePerCustomer: number | null;
         roce: number | null;
         debtServiceCoverageRatio: number | null;
+<<<<<<< HEAD
+=======
+        operatingCashFlowMargin?: number | null;
+        cashConversion?: number | null;
+        returnOnEquity?: number | null;
+        returnOnAssets?: number | null;
+        debtToEquity?: number | null;
+        liabilitiesToAssets?: number | null;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     };
 
     comparison?: FinancialComparison;

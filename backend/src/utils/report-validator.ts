@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { ReportValidationError } from "./errors";
+=======
+import { NotFinancialReportError, ReportValidationError } from "./errors";
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 export const REPORT_TYPES = [
     "Annual Report",
@@ -15,6 +19,43 @@ export const REPORT_TYPES = [
 
 export type ReportType = typeof REPORT_TYPES[number];
 
+<<<<<<< HEAD
+=======
+/** What the AI thinks the uploaded document is. */
+export const DOCUMENT_TYPES = [
+    "Financial Report",
+    "Financial Statements",
+    "Investor Presentation",
+    "CV / Resume",
+    "Cover Letter",
+    "Invoice / Receipt",
+    "Bank Statement",
+    "Payslip",
+    "Contract / Legal",
+    "Academic / Research",
+    "Other Non-Financial"
+] as const;
+
+export type DocumentType = typeof DOCUMENT_TYPES[number];
+
+/** Document types that may be stored. Everything else is rejected. */
+export const FINANCIAL_DOCUMENT_TYPES: readonly DocumentType[] = [
+    "Financial Report",
+    "Financial Statements",
+    "Investor Presentation"
+];
+
+/** Minimum AI confidence required to accept a document as a financial report. */
+export const MIN_CLASSIFICATION_CONFIDENCE = 0.7;
+
+export interface DocumentClassification {
+    isFinancialReport: boolean;
+    documentType: DocumentType;
+    confidence: number;
+    reason: string;
+}
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 export interface FinancialPeriod {
     period: string;
     periodEnd: string | null;
@@ -28,9 +69,20 @@ export interface FinancialPeriod {
     debt: number | null;
     customers: number | null;
     netAssets: number | null;
+<<<<<<< HEAD
 }
 
 export interface FinancialReport {
+=======
+    operatingCashFlow: number | null;
+    totalAssets: number | null;
+    totalLiabilities: number | null;
+    eps: number | null;
+}
+
+export interface FinancialReport {
+    classification: DocumentClassification;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     company: string;
     reportName: string;
     reportType: ReportType;
@@ -50,7 +102,15 @@ const METRIC_KEYS = [
     "cash",
     "debt",
     "customers",
+<<<<<<< HEAD
     "netAssets"
+=======
+    "netAssets",
+    "operatingCashFlow",
+    "totalAssets",
+    "totalLiabilities",
+    "eps"
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ] as const;
 
 type MetricKey = typeof METRIC_KEYS[number];
@@ -152,7 +212,15 @@ function validatePeriod(value: unknown, index: number): FinancialPeriod {
         cash: null,
         debt: null,
         customers: null,
+<<<<<<< HEAD
         netAssets: null
+=======
+        netAssets: null,
+        operatingCashFlow: null,
+        totalAssets: null,
+        totalLiabilities: null,
+        eps: null
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     };
 
     for (const key of METRIC_KEYS) {
@@ -162,6 +230,128 @@ function validatePeriod(value: unknown, index: number): FinancialPeriod {
     return result;
 }
 
+<<<<<<< HEAD
+=======
+function validateClassification(value: unknown): DocumentClassification {
+    if (!isRecord(value)) {
+        throw new NotFinancialReportError(
+            "The document could not be classified, so it was not saved."
+        );
+    }
+
+    const documentType = typeof value.documentType === "string"
+        ? value.documentType.trim()
+        : "";
+    const confidence = value.confidence;
+    const reason = typeof value.reason === "string"
+        ? value.reason.trim().slice(0, 300)
+        : "";
+
+    if (
+        typeof value.isFinancialReport !== "boolean" ||
+        !DOCUMENT_TYPES.includes(documentType as DocumentType) ||
+        typeof confidence !== "number" ||
+        !Number.isFinite(confidence) ||
+        confidence < 0 ||
+        confidence > 1
+    ) {
+        throw new NotFinancialReportError(
+            "The document could not be classified, so it was not saved."
+        );
+    }
+
+    return {
+        isFinancialReport: value.isFinancialReport,
+        documentType: documentType as DocumentType,
+        confidence,
+        reason
+    };
+}
+
+function assertIsFinancialDocument(classification: DocumentClassification): void {
+    const detail = classification.reason ? ` ${classification.reason}` : "";
+
+    if (
+        !classification.isFinancialReport ||
+        !FINANCIAL_DOCUMENT_TYPES.includes(classification.documentType)
+    ) {
+        throw new NotFinancialReportError(
+            `This document does not look like a financial report ` +
+            `(detected: ${classification.documentType}), so it was not saved.${detail}`
+        );
+    }
+
+    if (classification.confidence < MIN_CLASSIFICATION_CONFIDENCE) {
+        throw new NotFinancialReportError(
+            "We could not confirm this is a financial report, so it was not saved." +
+            detail
+        );
+    }
+}
+
+/** Monetary metrics that identify real financial statements. */
+const CORE_METRICS = [
+    "revenue",
+    "grossProfit",
+    "operatingProfit",
+    "netProfit",
+    "totalAssets",
+    "operatingCashFlow",
+    "netAssets"
+] as const;
+
+const MONETARY_METRICS = METRIC_KEYS.filter(
+    key => key !== "customers" && key !== "eps"
+);
+
+/**
+ * Deterministic checks that do not rely on the AI's own classification:
+ * at least one period must carry at least two monetary figures, one of which
+ * is a core statement figure, and the figures must be plausible.
+ */
+export function assertFinancialContent(periods: FinancialPeriod[]): void {
+    const hasSubstantivePeriod = periods.some(period => {
+        const monetaryCount = MONETARY_METRICS
+            .filter(key => period[key] !== null).length;
+        const hasCore = CORE_METRICS.some(key => period[key] !== null);
+
+        return hasCore && monetaryCount >= 2;
+    });
+
+    if (!hasSubstantivePeriod) {
+        throw new NotFinancialReportError(
+            "No core financial figures (such as revenue, profit or total assets) " +
+            "were found, so the document was not saved."
+        );
+    }
+
+    for (const period of periods) {
+        if (period.revenue !== null && period.revenue < 0) {
+            throw new ReportValidationError(
+                `The extracted revenue for ${period.period} is negative.`
+            );
+        }
+
+        if (period.totalAssets !== null && period.totalAssets < 0) {
+            throw new ReportValidationError(
+                `The extracted total assets for ${period.period} are negative.`
+            );
+        }
+
+        if (
+            period.revenue !== null &&
+            period.grossProfit !== null &&
+            period.revenue > 0 &&
+            period.grossProfit > period.revenue
+        ) {
+            throw new ReportValidationError(
+                `The extracted gross profit for ${period.period} exceeds revenue.`
+            );
+        }
+    }
+}
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 export function parseAndValidateReport(aiResponse: string): FinancialReport {
     let parsed: unknown;
 
@@ -175,6 +365,14 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
         throw new ReportValidationError("The analysis service returned an invalid report.");
     }
 
+<<<<<<< HEAD
+=======
+    // Classification is checked first: a non-financial document (e.g. a CV)
+    // must be rejected before anything else is interpreted or stored.
+    const classification = validateClassification(parsed.classification);
+    assertIsFinancialDocument(classification);
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     const reportType = requiredString(parsed.reportType, "report type", 80);
     if (!REPORT_TYPES.includes(reportType as ReportType)) {
         throw new ReportValidationError(`The extracted report type '${reportType}' is unsupported.`);
@@ -186,7 +384,11 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
     }
 
     if (!Array.isArray(parsed.periods) || parsed.periods.length === 0) {
+<<<<<<< HEAD
         throw new ReportValidationError("No financial reporting periods were found in the uploaded PDF.");
+=======
+        throw new NotFinancialReportError("No financial reporting periods were found in the uploaded PDF.");
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
     if (parsed.periods.length > 40) {
         throw new ReportValidationError("The document contains too many reporting periods.");
@@ -198,7 +400,14 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
         throw new ReportValidationError("The analysis returned duplicate reporting periods.");
     }
 
+<<<<<<< HEAD
     return {
+=======
+    assertFinancialContent(periods);
+
+    return {
+        classification,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         company: requiredString(parsed.company, "company", 255),
         reportName: requiredString(parsed.reportName, "report name", 300),
         reportType: reportType as ReportType,

@@ -1,0 +1,89 @@
+.sign-in {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.sign-in-content {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+}
+
+.sign-in h1 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.sign-in p {
+  margin: 0 auto 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--secondary);
+}
+
+.google-button {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+  margin-bottom: 1.5rem;
+}
+
+.sign-in .sign-in-error {
+  color: var(--danger);
+  font-size: var(--font-small);
+}
+
+.back-link {
+  color: var(--secondary);
+  font-size: var(--font-small);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.sign-in-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.recover-button {
+  padding: 0.65rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--surface-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.recover-button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.text-button {
+  font: inherit;
+  color: var(--secondary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.text-button:hover {
+  color: var(--primary);
+}

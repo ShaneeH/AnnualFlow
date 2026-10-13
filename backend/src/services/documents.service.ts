@@ -27,6 +27,13 @@ export interface DocumentPeriodRecord {
     debt: number | string | null;
     customers: number | string | null;
     netAssets: number | string | null;
+<<<<<<< HEAD
+=======
+    operatingCashFlow: number | string | null;
+    totalAssets: number | string | null;
+    totalLiabilities: number | string | null;
+    eps: number | string | null;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 export interface FinancialDocumentRecord {
@@ -39,6 +46,13 @@ export interface FinancialDocumentRecord {
     currency: string | null;
     source: string | null;
     uploadedAt: string;
+<<<<<<< HEAD
+=======
+    /** SHA-256 of the uploaded PDF bytes (used for duplicate detection). */
+    documentHash?: string | null;
+    /** True when the viewer owns it (rows from other users are never returned). */
+    isOwned?: boolean;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     periods: DocumentPeriodRecord[];
 }
 
@@ -60,6 +74,11 @@ export interface SavedDocumentResult {
 }
 
 export interface DocumentListOptions {
+<<<<<<< HEAD
+=======
+    /** Signed-in user id, or null for public rows only. */
+    viewerId: number | null;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     companyId?: number;
     limit?: number;
     offset?: number;
@@ -82,6 +101,11 @@ const DOCUMENT_SELECT = `
         d.currency,
         d.source,
         d.uploaded_at AS "uploadedAt",
+<<<<<<< HEAD
+=======
+        d.document_hash AS "documentHash",
+        (d.user_id IS NOT NULL) AS "isOwned",
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         COALESCE(
             JSONB_AGG(
                 JSONB_BUILD_OBJECT(
@@ -97,7 +121,15 @@ const DOCUMENT_SELECT = `
                     'cash', fp.cash,
                     'debt', fp.debt,
                     'customers', fp.customers,
+<<<<<<< HEAD
                     'netAssets', fp.net_assets
+=======
+                    'netAssets', fp.net_assets,
+                    'operatingCashFlow', fp.operating_cash_flow,
+                    'totalAssets', fp.total_assets,
+                    'totalLiabilities', fp.total_liabilities,
+                    'eps', fp.eps
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
                 )
                 ORDER BY fp.period_end DESC NULLS LAST, fp.period_id DESC
             ) FILTER (WHERE fp.period_id IS NOT NULL),
@@ -122,6 +154,7 @@ const DOCUMENT_GROUP = `
         d.report_date,
         d.currency,
         d.source,
+<<<<<<< HEAD
         d.uploaded_at
 `;
 
@@ -131,6 +164,24 @@ export async function documentExistsByHash(
     const result = await pool.query(
         "SELECT 1 FROM documents WHERE document_hash = $1 LIMIT 1",
         [documentHash]
+=======
+        d.uploaded_at,
+        d.document_hash,
+        d.user_id
+`;
+
+/** Visibility rule shared with companies.service: public rows plus the viewer's own. */
+const visibleDocument = (param: string) => `(d.user_id IS NULL OR d.user_id = ${param})`;
+
+/** Duplicate check, per owner: another user's copy of the same PDF does not count. */
+export async function documentExistsByHash(
+    documentHash: string,
+    ownerId: number
+): Promise<boolean> {
+    const result = await pool.query(
+        "SELECT 1 FROM documents WHERE document_hash = $1 AND user_id = $2 LIMIT 1",
+        [documentHash, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     return Boolean(result.rowCount);
@@ -139,7 +190,12 @@ export async function documentExistsByHash(
 export async function saveFinancialDocument(
     documentHash: string,
     openaiFileId: string,
+<<<<<<< HEAD
     report: FinancialReport
+=======
+    report: FinancialReport,
+    ownerId: number
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ): Promise<SavedDocumentResult> {
     const client = await pool.connect();
     const conflicts: PeriodConflict[] = [];
@@ -148,21 +204,38 @@ export async function saveFinancialDocument(
         await client.query("BEGIN");
 
         const existing = await client.query(
+<<<<<<< HEAD
             "SELECT 1 FROM documents WHERE document_hash = $1 LIMIT 1",
             [documentHash]
+=======
+            "SELECT 1 FROM documents WHERE document_hash = $1 AND user_id = $2 LIMIT 1",
+            [documentHash, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         );
 
         if (existing.rowCount) {
             throw new DuplicateDocumentError();
         }
 
+<<<<<<< HEAD
         const companyId = await getOrCreateCompany(
             client,
             report.company
+=======
+        // Always the uploader's own company record, never a public or another user's one.
+        const companyId = await getOrCreateCompany(
+            client,
+            report.company,
+            ownerId
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         );
 
         const documentId = await insertDocument(
             client,
+<<<<<<< HEAD
+=======
+            ownerId,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             companyId,
             documentHash,
             openaiFileId,
@@ -177,6 +250,15 @@ export async function saveFinancialDocument(
                 conflicts
             );
 
+<<<<<<< HEAD
+=======
+            // The period's figures may have changed: invalidate its cached insight.
+            await client.query(
+                "DELETE FROM ai_insights WHERE company_id = $1 AND period = $2",
+                [companyId, period.period]
+            );
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             await linkDocumentToPeriod(
                 client,
                 documentId,
@@ -206,10 +288,17 @@ export async function saveFinancialDocument(
 }
 
 export async function getDocuments(
+<<<<<<< HEAD
     options: DocumentListOptions = {}
 ): Promise<FinancialDocumentRecord[]> {
     const values: number[] = [];
     const conditions: string[] = [];
+=======
+    options: DocumentListOptions
+): Promise<FinancialDocumentRecord[]> {
+    const values: Array<number | null> = [options.viewerId];
+    const conditions: string[] = [visibleDocument("$1")];
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     if (options.companyId !== undefined) {
         values.push(options.companyId);
@@ -239,11 +328,15 @@ export async function getDocuments(
         `
         ${DOCUMENT_SELECT}
 
+<<<<<<< HEAD
         ${
             conditions.length
                 ? `WHERE ${conditions.join(" AND ")}`
                 : ""
         }
+=======
+        WHERE ${conditions.join(" AND ")}
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         ${DOCUMENT_GROUP}
 
@@ -259,25 +352,42 @@ export async function getDocuments(
 }
 
 export async function getDocumentById(
+<<<<<<< HEAD
     documentId: number
+=======
+    documentId: number,
+    viewerId: number | null
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ): Promise<FinancialDocumentRecord | null> {
     const result = await pool.query<FinancialDocumentRecord>(
         `
         ${DOCUMENT_SELECT}
 
         WHERE d.document_id = $1
+<<<<<<< HEAD
+=======
+          AND ${visibleDocument("$2")}
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         ${DOCUMENT_GROUP}
 
         LIMIT 1;
         `,
+<<<<<<< HEAD
         [documentId]
+=======
+        [documentId, viewerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     return result.rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 export async function getDocumentStats(): Promise<{
+=======
+export async function getDocumentStats(viewerId: number | null): Promise<{
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     documents: number;
     companies: number;
     latestUpload: string | null;
@@ -292,8 +402,15 @@ export async function getDocumentStats(): Promise<{
             COUNT(*)::TEXT AS documents,
             COUNT(DISTINCT d.company_id)::TEXT AS companies,
             MAX(d.uploaded_at) AS "latestUpload"
+<<<<<<< HEAD
         FROM documents d;
         `
+=======
+        FROM documents d
+        WHERE ${visibleDocument("$1")};
+        `,
+        [viewerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     return {
@@ -303,8 +420,15 @@ export async function getDocumentStats(): Promise<{
     };
 }
 
+<<<<<<< HEAD
 export async function deleteFinancialDocument(
     documentId: number
+=======
+/** Deletes one of the owner's documents. Public (example) documents can never be deleted here. */
+export async function deleteFinancialDocument(
+    documentId: number,
+    ownerId: number
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ): Promise<DeletedDocument | null> {
     const client = await pool.connect();
 
@@ -325,9 +449,16 @@ export async function deleteFinancialDocument(
                 openai_file_id
             FROM documents
             WHERE document_id = $1
+<<<<<<< HEAD
             FOR UPDATE;
             `,
             [documentId]
+=======
+              AND user_id = $2
+            FOR UPDATE;
+            `,
+            [documentId, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         );
 
         if (!document.rowCount) {
@@ -383,6 +514,24 @@ export async function deleteFinancialDocument(
             );
         }
 
+<<<<<<< HEAD
+=======
+        // Drop cached AI insights whose financial period no longer exists.
+        await client.query(
+            `
+            DELETE FROM ai_insights ai
+            WHERE ai.company_id = $1
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM financial_periods fp
+                  WHERE fp.company_id = ai.company_id
+                    AND fp.period = ai.period
+              );
+            `,
+            [row.company_id]
+        );
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         await client.query(
             `
             DELETE FROM companies c
@@ -418,13 +567,23 @@ export async function deleteFinancialDocument(
 
 async function getOrCreateCompany(
     client: PoolClient,
+<<<<<<< HEAD
     companyName: string
+=======
+    companyName: string,
+    ownerId: number
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ): Promise<number> {
     const normalisedName = companyName.trim();
 
     await client.query(
+<<<<<<< HEAD
         "SELECT pg_advisory_xact_lock(hashtext(LOWER($1)))",
         [normalisedName]
+=======
+        "SELECT pg_advisory_xact_lock(hashtext($2::TEXT || ':' || LOWER($1)))",
+        [normalisedName, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     const existing = await client.query<{
@@ -434,10 +593,18 @@ async function getOrCreateCompany(
         SELECT company_id
         FROM companies
         WHERE LOWER(company_name) = LOWER($1)
+<<<<<<< HEAD
         ORDER BY company_id
         LIMIT 1;
         `,
         [normalisedName]
+=======
+          AND user_id = $2
+        ORDER BY company_id
+        LIMIT 1;
+        `,
+        [normalisedName, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     if (existing.rows[0]) {
@@ -449,12 +616,22 @@ async function getOrCreateCompany(
     }>(
         `
         INSERT INTO companies (
+<<<<<<< HEAD
             company_name
         )
         VALUES ($1)
         RETURNING company_id;
         `,
         [normalisedName]
+=======
+            company_name,
+            user_id
+        )
+        VALUES ($1, $2)
+        RETURNING company_id;
+        `,
+        [normalisedName, ownerId]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     return inserted.rows[0].company_id;
@@ -462,6 +639,10 @@ async function getOrCreateCompany(
 
 async function insertDocument(
     client: PoolClient,
+<<<<<<< HEAD
+=======
+    ownerId: number,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     companyId: number,
     documentHash: string,
     openaiFileId: string,
@@ -472,6 +653,10 @@ async function insertDocument(
     }>(
         `
         INSERT INTO documents (
+<<<<<<< HEAD
+=======
+            user_id,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             company_id,
             document_hash,
             openai_file_id,
@@ -489,11 +674,20 @@ async function insertDocument(
             $5,
             $6,
             $7,
+<<<<<<< HEAD
             $8
+=======
+            $8,
+            $9
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         )
         RETURNING document_id;
         `,
         [
+<<<<<<< HEAD
+=======
+            ownerId,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             companyId,
             documentHash,
             openaiFileId,
@@ -592,6 +786,25 @@ async function upsertFinancialPeriod(
                     $12,
                     net_assets
                 ),
+<<<<<<< HEAD
+=======
+                operating_cash_flow = COALESCE(
+                    $13,
+                    operating_cash_flow
+                ),
+                total_assets = COALESCE(
+                    $14,
+                    total_assets
+                ),
+                total_liabilities = COALESCE(
+                    $15,
+                    total_liabilities
+                ),
+                eps = COALESCE(
+                    $16,
+                    eps
+                ),
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
                 updated_at = CURRENT_TIMESTAMP
             WHERE period_id = $1;
             `,
@@ -607,7 +820,15 @@ async function upsertFinancialPeriod(
                 period.cash,
                 period.debt,
                 period.customers,
+<<<<<<< HEAD
                 period.netAssets
+=======
+                period.netAssets,
+                period.operatingCashFlow,
+                period.totalAssets,
+                period.totalLiabilities,
+                period.eps
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             ]
         );
 
@@ -631,7 +852,15 @@ async function upsertFinancialPeriod(
             cash,
             debt,
             customers,
+<<<<<<< HEAD
             net_assets
+=======
+            net_assets,
+            operating_cash_flow,
+            total_assets,
+            total_liabilities,
+            eps
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         )
         VALUES (
             $1,
@@ -646,7 +875,15 @@ async function upsertFinancialPeriod(
             $10,
             $11,
             $12,
+<<<<<<< HEAD
             $13
+=======
+            $13,
+            $14,
+            $15,
+            $16,
+            $17
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         )
         RETURNING period_id;
         `,
@@ -663,7 +900,15 @@ async function upsertFinancialPeriod(
             period.cash,
             period.debt,
             period.customers,
+<<<<<<< HEAD
             period.netAssets
+=======
+            period.netAssets,
+            period.operatingCashFlow,
+            period.totalAssets,
+            period.totalLiabilities,
+            period.eps
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         ]
     );
 
@@ -679,7 +924,15 @@ const PERIOD_METRIC_COLUMNS = [
     ["cash", "cash"],
     ["debt", "debt"],
     ["customers", "customers"],
+<<<<<<< HEAD
     ["netAssets", "net_assets"]
+=======
+    ["netAssets", "net_assets"],
+    ["operatingCashFlow", "operating_cash_flow"],
+    ["totalAssets", "total_assets"],
+    ["totalLiabilities", "total_liabilities"],
+    ["eps", "eps"]
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ] as const;
 
 type PeriodMetricColumn = typeof PERIOD_METRIC_COLUMNS[number][1];

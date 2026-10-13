@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <nav class="navbar">
   <div class="navbar-brand">
     <h2 routerLink="/dashboard" class="navbar-logo">ReportHub</h2>
@@ -10,3 +11,38 @@
   </div>
 
 </nav>
+=======
+<nav class="navbar" aria-label="Main">
+  <div class="navbar-brand">
+    <a routerLink="/" class="navbar-logo" aria-label="Annualflow home"><app-mascot [size]="28" /><span>Annualflow</span></a>
+  </div>
+
+  <button
+    type="button"
+    class="menu-toggle"
+    aria-controls="navbar-links"
+    [attr.aria-expanded]="menuOpen"
+    [attr.aria-label]="menuOpen ? 'Close menu' : 'Open menu'"
+    (click)="toggleMenu()">
+    <span class="menu-icon" [class.open]="menuOpen" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </span>
+  </button>
+
+  <div class="navbar-links" id="navbar-links" [class.open]="menuOpen">
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/documents" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Add / View Reports</a>
+    <a routerLink="/about" routerLinkActive="active">About</a>
+    @if (auth.currentUser(); as user) {
+      <a routerLink="/profile" routerLinkActive="active" class="navbar-avatar"
+        [title]="(user.name || user.email || 'Profile')"
+        [attr.aria-label]="'Profile: ' + (user.name || user.email || 'signed in')">
+        <app-letter-avatar [name]="user.name || user.email" [size]="32" />
+        <span class="navbar-avatar-label">Profile</span>
+      </a>
+    } @else if (auth.loaded()) {
+      <a routerLink="/sign-in" routerLinkActive="active">Sign in</a>
+    }
+  </div>
+</nav>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

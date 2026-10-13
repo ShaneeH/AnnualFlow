@@ -34,6 +34,18 @@
             ],
             "styles": [
               "src/styles/theme.css"
+<<<<<<< HEAD
+=======
+            ],
+            "allowedCommonJsDependencies": [
+              "exceljs",
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "html2canvas",
+              "dompurify"
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             ]
           },
           "configurations": {
@@ -46,7 +58,11 @@
                 },
                 {
                   "type": "anyComponentStyle",
+<<<<<<< HEAD
                   "maximumWarning": "6kB",
+=======
+                  "maximumWarning": "10kB",
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
                   "maximumError": "10kB"
                 }
               ],

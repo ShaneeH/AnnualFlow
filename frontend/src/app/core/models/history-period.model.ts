@@ -24,4 +24,24 @@ export interface HistoryPeriod {
 
     netAssets: number | null;
 
+<<<<<<< HEAD
+=======
+    operatingCashFlow: number | null;
+
+    totalAssets: number | null;
+
+    totalLiabilities: number | null;
+
+    eps: number | null;
+
+    // Derived by the backend from the figures above.
+    grossMargin: number | null;
+
+    operatingMargin: number | null;
+
+    ebitdaMargin: number | null;
+
+    netMargin: number | null;
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }

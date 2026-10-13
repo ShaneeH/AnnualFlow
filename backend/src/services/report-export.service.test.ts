@@ -32,7 +32,15 @@ const document: FinancialDocumentRecord = {
         cash: 300000,
         debt: 100000,
         customers: 2500,
+<<<<<<< HEAD
         netAssets: 800000
+=======
+        netAssets: 800000,
+        operatingCashFlow: 210000,
+        totalAssets: 1500000,
+        totalLiabilities: 700000,
+        eps: 0.42
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }]
 };
 

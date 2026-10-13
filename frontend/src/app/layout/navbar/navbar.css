@@ -7,6 +7,10 @@
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   border-bottom: 2px solid #1a1a1a;
+<<<<<<< HEAD
+=======
+  background: var(--background);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -26,38 +30,169 @@
   color: #ffffff;
   cursor: pointer;
   letter-spacing: -0.02em;
+<<<<<<< HEAD
+=======
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  line-height: 1;
+}
+
+.navbar-links a.active {
+  color: #ffffff;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 /* Center links */
 .navbar-links {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 2rem;
+=======
+  gap: 1.25rem;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 .navbar-links a {
   color: #a1a1aa;
   text-decoration: none;
+<<<<<<< HEAD
   font-size: 0.95rem;
   font-weight: 500;
+=======
+  font-size: 1.0625rem;
+  font-weight: 700;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   padding: 0.45rem 0.85rem;          
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
+<<<<<<< HEAD
+=======
+/* Signed-in avatar: the circle is the link; the label only shows in the mobile menu. */
+.navbar-links a.navbar-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+.navbar-links a.navbar-avatar:hover {
+  background-color: transparent;
+  opacity: 0.85;
+}
+
+.navbar-avatar-label {
+  display: none;
+}
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 .navbar-links a:hover {
   color: #ffffff;
   background-color: #1f1f1f;         
 }
 
 
+<<<<<<< HEAD
 /* Optional: make it responsive */
+=======
+/* Hamburger button: only shown on small screens. */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #2a2a2e;
+  border-radius: 8px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.menu-toggle:focus-visible,
+.navbar-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.menu-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 18px;
+}
+
+.menu-icon span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.menu-icon.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.menu-icon.open span:nth-child(2) { opacity: 0; }
+.menu-icon.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 @media (max-width: 768px) {
   .navbar {
     padding: 0 1rem;
   }
 
+<<<<<<< HEAD
   .navbar-links {
     display: none;
   }
 }
+=======
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .navbar-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem 1rem;
+    background: var(--background);
+    border-bottom: 1px solid #2a2a2e;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .navbar-links a {
+    padding: 0.75rem 0.85rem;
+    font-size: 1.0625rem;
+  }
+
+  .navbar-links a.navbar-avatar {
+    border-radius: 6px;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .navbar-avatar-label {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-icon span,
+  .navbar-links a {
+    transition: none;
+  }
+}
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

@@ -1,4 +1,5 @@
 <section class="view-documents">
+<<<<<<< HEAD
   <header class="section-header">
     <div>
       <span class="section-eyebrow">Document Library</span>
@@ -8,10 +9,21 @@
 
     <div class="header-actions">
       @if (!isLoading) {
+=======
+  <header class="page-header">
+    <div class="page-title">
+      <h2>My Reports</h2>
+      <p>The documents behind your dashboard figures.</p>
+    </div>
+
+    <div class="header-actions">
+      @if (!isLoading || documents.length > 0) {
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         <span class="document-count">
           {{ documents.length }} {{ documents.length === 1 ? 'report' : 'reports' }}
         </span>
       }
+<<<<<<< HEAD
 
       <button
         type="button"
@@ -21,6 +33,16 @@
         aria-label="Refresh documents"
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+=======
+      <button
+        type="button"
+        class="ghost-button"
+        [disabled]="isLoading"
+        (click)="loadDocuments()"
+        aria-label="Refresh reports"
+      >
+        <svg class="icon" [class.spinning]="isLoading" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
           <path d="M20 6v5h-5M4 18v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M18.2 9A7 7 0 006.4 6.4L4 9m2 6a7 7 0 0011.6 2.6L20 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -30,6 +52,7 @@
   </header>
 
   @if (successMessage) {
+<<<<<<< HEAD
     <div class="status-message success-message" role="status">
       <span class="status-icon">✓</span>
       {{ successMessage }}
@@ -161,6 +184,175 @@
           </tbody>
         </table>
       </div>
+=======
+    <div class="status-message success" role="status">{{ successMessage }}</div>
+  }
+  @if (errorMessage && documents.length > 0) {
+    <div class="status-message error" role="alert">{{ errorMessage }}</div>
+  }
+
+  @if (isLoading && documents.length === 0) {
+    <div class="table-card" aria-live="polite" aria-busy="true">
+      <span class="visually-hidden">Loading reports…</span>
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-row"><span></span><span></span><span></span></div>
+      }
+    </div>
+  } @else if (errorMessage && documents.length === 0) {
+    <div class="empty-state">
+      <h3>Could not load your reports</h3>
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="ghost-button" (click)="loadDocuments()">Try again</button>
+    </div>
+  } @else if (documents.length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z M14 3v5h5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <h3>No reports yet</h3>
+      <p>Upload a financial report PDF and it will appear here.</p>
+    </div>
+  } @else {
+    <div class="table-card" [class.is-refreshing]="isLoading">
+      <table>
+        <colgroup>
+          <col class="col-report" /><col class="col-company" /><col class="col-periods" />
+          <col class="col-type" /><col class="col-date" /><col class="col-date" /><col class="col-actions" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Report</th>
+            <th scope="col">Company</th>
+            <th scope="col">Periods</th>
+            <th scope="col">Type</th>
+            <th scope="col" class="num">Report date</th>
+            <th scope="col" class="num">Uploaded</th>
+            <th scope="col" class="num"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (document of documents; track document.documentId) {
+            <tr>
+              <td data-label="Report">
+                <div class="report-wrap">
+                <div class="report-cell">
+                  <span class="report-name" [title]="document.reportName">{{ document.reportName }}</span>
+                  <span class="report-meta">
+                    {{ documentMeta(document) }}
+                    @if (getSourceUrl(document.source); as sourceUrl) {
+                      @if (documentMeta(document)) { · }<a [href]="sourceUrl" target="_blank" rel="noopener noreferrer">Source</a>
+                    }
+                  </span>
+                </div>
+                </div>
+              </td>
+              <td data-label="Company">
+                <div class="company-cell">
+                  <span class="avatar" aria-hidden="true" [style]="avatarStyle(document.companyName)">{{ companyInitial(document.companyName) }}</span>
+                  <span class="truncate" [title]="document.companyName">{{ document.companyName }}</span>
+                </div>
+              </td>
+              <td data-label="Periods">
+                <div class="period-tags">
+                  @for (period of visiblePeriods(document); track period.periodId) {
+                    <span class="tag" [class]="'tag ' + periodTagClass(period.period)" [title]="period.periodLabel">{{ formatPeriodTag(period.period) }}</span>
+                  } @empty {
+                    <span class="muted">—</span>
+                  }
+                  @if (hiddenPeriodCount(document) > 0) {
+                    <button
+                      type="button"
+                      class="tag tag-more"
+                      [title]="expandedDocumentIds.has(document.documentId) ? 'Show fewer' : hiddenPeriodsTitle(document)"
+                      [attr.aria-expanded]="expandedDocumentIds.has(document.documentId)"
+                      (click)="togglePeriods(document.documentId)"
+                    >
+                      {{ expandedDocumentIds.has(document.documentId) ? 'Show less' : '+' + hiddenPeriodCount(document) + ' more' }}
+                    </button>
+                  }
+                </div>
+              </td>
+              <td data-label="Type"><span class="type-text" [title]="document.reportType">{{ typeLabel(document) }}</span></td>
+              <td data-label="Report date" class="num">
+                @if (document.reportDate) {
+                  {{ document.reportDate | date:'dd MMM yyyy':'UTC' }}
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td data-label="Uploaded" class="num" [title]="(document.uploadedAt | date:'dd MMM yyyy, HH:mm') ?? ''">
+                {{ document.uploadedAt | date:'dd MMM yyyy' }}
+              </td>
+              <td class="num actions-cell">
+                @if (pendingDeleteId === document.documentId) {
+                  <div class="confirm" role="group" [attr.aria-label]="'Confirm delete ' + document.reportName">
+                    <span>Delete?</span>
+                    <button
+                      type="button"
+                      class="small-button danger"
+                      [disabled]="deletingDocumentId === document.documentId"
+                      (click)="confirmDelete(document)"
+                    >{{ deletingDocumentId === document.documentId ? 'Deleting…' : 'Delete' }}</button>
+                    <button
+                      type="button"
+                      class="small-button"
+                      [disabled]="deletingDocumentId === document.documentId"
+                      (click)="cancelDelete()"
+                    >Cancel</button>
+                  </div>
+                } @else {
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="icon-button"
+                      [disabled]="generatingCompanyId !== null"
+                      (click)="downloadCompanyReport(document)"
+                      [title]="'Company report PDF (all periods of ' + document.companyName + ')'"
+                      [attr.aria-label]="'Download company report for ' + document.companyName"
+                    >
+                      @if (generatingCompanyId === document.companyId) {
+                        <span class="mini-spinner" aria-hidden="true"></span>
+                      } @else {
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5M12 11v6M9 14l3 3 3-3" />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button"
+                      [disabled]="exportingJsonCompanyId !== null"
+                      (click)="exportCompanyJson(document)"
+                      [title]="'Export JSON (all periods of ' + document.companyName + ')'"
+                      [attr.aria-label]="'Export JSON for ' + document.companyName"
+                    >
+                      @if (exportingJsonCompanyId === document.companyId) {
+                        <span class="mini-spinner" aria-hidden="true"></span>
+                      } @else {
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H7a2 2 0 00-2 2v4a2 2 0 01-2 2 2 2 0 012 2v4a2 2 0 002 2h1M16 4h1a2 2 0 012 2v4a2 2 0 002 2 2 2 0 00-2 2v4a2 2 0 01-2 2h-1"/></svg>
+                      }
+                    </button>
+                    @if (document.isOwned) {
+                    <button
+                      type="button"
+                      class="icon-button danger"
+                      (click)="requestDelete(document.documentId)"
+                      title="Delete report"
+                      [attr.aria-label]="'Delete ' + document.reportName"
+                    >
+                      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7h16M9 7V4h6v3m3 0l-1 13H7L6 7" /><path d="M10 11v5m4-5v5" />
+                      </svg>
+                    </button>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     </div>
   }
 </section>

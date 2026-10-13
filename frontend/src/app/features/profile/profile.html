@@ -1,0 +1,89 @@
+<section class="profile-page">
+  @if (account; as a) {
+    <header class="profile-header">
+      <app-letter-avatar [name]="a.user.name || a.user.email" [size]="88" />
+      <div class="profile-identity">
+        <h1>{{ a.user.name || 'Your account' }}</h1>
+        @if (a.user.email) {
+          <p class="profile-email">{{ a.user.email }}</p>
+        }
+      </div>
+    </header>
+
+    <dl class="profile-details">
+      <div>
+        <dt>Sign-in method</dt>
+        <dd>Signed in with Google</dd>
+      </div>
+      <div>
+        <dt>Member since</dt>
+        <dd>{{ a.user.createdAt | date:'d MMMM yyyy' }}</dd>
+      </div>
+      <div>
+        <dt>Companies</dt>
+        <dd class="num">{{ a.counts.companies }}</dd>
+      </div>
+      <div>
+        <dt>Reports</dt>
+        <dd class="num">{{ a.counts.reports }}</dd>
+      </div>
+    </dl>
+
+    <div class="profile-section">
+      <h2>Account</h2>
+
+      <div class="profile-row">
+        <div>
+          <h3>Export my data</h3>
+          <p>Download your profile and the figures from all of your reports as one JSON file.</p>
+        </div>
+        <button type="button" class="plain-button" [disabled]="exporting" (click)="exportData()">
+          {{ exporting ? 'Preparing…' : 'Export my data' }}
+        </button>
+      </div>
+
+      <div class="profile-row">
+        <div>
+          <h3>Sign out</h3>
+          <p>End this session on this browser.</p>
+        </div>
+        <button type="button" class="plain-button" (click)="signOut()">Sign out</button>
+      </div>
+
+      <div class="profile-row danger-row">
+        <div>
+          <h3>Delete account</h3>
+          <p>
+            Your account and reports are hidden straight away and permanently removed after 30 days.
+            Sign in again before then to recover them.
+          </p>
+        </div>
+        @if (!confirmingDelete) {
+          <button type="button" class="plain-button danger" (click)="startDelete()">Delete account</button>
+        }
+      </div>
+
+      @if (confirmingDelete) {
+        <form class="delete-confirm" (ngSubmit)="deleteAccount()">
+          <label for="confirm-delete">Type <strong>DELETE</strong> to confirm</label>
+          <div class="delete-confirm-controls">
+            <input id="confirm-delete" name="confirm" type="text" autocomplete="off" spellcheck="false"
+              [(ngModel)]="confirmText" />
+            <button type="submit" class="plain-button danger" [disabled]="confirmText !== 'DELETE' || deleting">
+              {{ deleting ? 'Deleting…' : 'Delete account' }}
+            </button>
+            <button type="button" class="text-button" (click)="cancelDelete()">Cancel</button>
+          </div>
+        </form>
+      }
+
+      @if (actionError) {
+        <p class="profile-error" role="alert">{{ actionError }}</p>
+      }
+    </div>
+  } @else if (loadError) {
+    <p class="profile-error" role="alert">{{ loadError }}</p>
+  } @else {
+    <p class="profile-loading">Loading your account…</p>
+  }
+</section>

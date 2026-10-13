@@ -1,0 +1,62 @@
+<article class="privacy">
+  <h1>Privacy</h1>
+  <p class="updated">Last updated 12 October 2026</p>
+
+  <p>
+    Annualflow is a small open source project. This page explains, in plain terms, what it keeps and why.
+    You can browse the example dataset without signing in.
+  </p>
+
+  <h2>What is stored</h2>
+  <ul>
+    <li>
+      When you sign in with Google: your name, email address, Google account ID and profile picture URL, and the
+      date you joined. Nothing else from your Google account.
+    </li>
+    <li>
+      The reports you upload: the company, report name, type, date and currency, the figures extracted for each
+      period, a fingerprint (SHA-256) of the PDF used to spot duplicates, and any insights you generate.
+    </li>
+    <li>
+      The PDF itself is not kept in the database. While a background upload is waiting to be processed it is held
+      temporarily and cleared as soon as processing finishes.
+    </li>
+  </ul>
+  <p>Your reports are private to your account. Other users cannot see them.</p>
+
+  <h2>OpenAI</h2>
+  <p>
+    To read a report, the PDF is uploaded to OpenAI's API and analysed there. If the upload fails or is not a
+    financial report, that copy is deleted straight away. If it succeeds, the copy stays in OpenAI's file storage
+    until you delete the report, or until your account is permanently deleted, and is then deleted too. When you ask for insights, only the stored
+    figures for that period are sent, not the PDF. Requests are made with response storage turned off.
+  </p>
+
+  <h2>Cookies and local storage</h2>
+  <p>
+    There is one cookie: <code>rh_session</code>, an httpOnly sign-in cookie that lasts 7 days and is removed
+    when you sign out. Your dashboard selections (company, period, comparison period, chart view and whether the
+    insights panel is open) are saved in your browser's local storage under <code>annualflow.dashboard.v1</code>,
+    and never leave your browser.
+  </p>
+  <p>
+    There is no analytics or tracking. The fonts are loaded from Google Fonts, and the sign-in button is loaded
+    from Google when you open the sign-in page.
+  </p>
+
+  <h2>Your data</h2>
+  <p>
+    On your <a routerLink="/profile">profile page</a> you can export all of your data as a JSON file, and delete
+    your account. Deleting hides everything straight away. If you sign in again within 30 days you can recover it.
+    After that, your account and everything you uploaded are permanently deleted.
+  </p>
+
+  <h2>Open source</h2>
+  <p>
+    The code is open source under the MIT Licence, so you can check all of this yourself on
+    <a [href]="repoUrl" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </p>
+
+  <h2>Contact</h2>
+  <p>Questions or requests: <a href="mailto:s.hahesy@outlook.com">s.hahesy&#64;outlook.com</a></p>
+</article>

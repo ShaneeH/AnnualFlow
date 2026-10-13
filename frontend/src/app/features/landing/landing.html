@@ -1,0 +1,127 @@
+<main class="landing">
+  <section class="intro" aria-labelledby="intro-title">
+    <div class="hero-title">
+      <app-mascot class="hero-mascot" [size]="84" [animated]="true" />
+      <h1 id="intro-title">Annualflow</h1>
+    </div>
+    <p class="lead">
+      An open source project by Shane Hahesy that turns financial report PDFs into structured data.
+    </p>
+    <p>
+      Upload a company's report and the key figures are extracted, checked and stored by company and period.
+      You can then compare periods on a dashboard and export a short board report.
+    </p>
+    <div class="actions">
+      <a routerLink="/documents/new" class="btn btn-primary">Create new report</a>
+      <button type="button" class="btn" (click)="openExample()" [disabled]="isOpeningExample">
+        {{ isOpeningExample ? 'Opening example…' : 'Explore the example dataset' }}
+      </button>
+      @if (auth.currentUser()) {
+        <a routerLink="/documents" class="text-link account-link">Go to My Reports</a>
+      } @else {
+        <a routerLink="/sign-in" class="text-link account-link">Sign in with Google</a>
+      }
+      <a [href]="repoUrl" target="_blank" rel="noopener noreferrer" class="text-link">View on GitHub</a>
+    </div>
+    <p class="note">The example dataset uses Northwind Analytics plc, a fictional company.</p>
+  </section>
+
+  <figure class="preview" aria-label="Preview of the dashboard for the example dataset">
+    <div class="preview-head">
+      <span>Northwind Analytics plc · FY2025</span>
+      <span class="preview-tag">Example dataset</span>
+    </div>
+    <div class="preview-kpis">
+      @for (kpi of previewKpis; track kpi.label) {
+        <div class="preview-kpi">
+          <span class="preview-kpi-label">{{ kpi.label }}</span>
+          <strong>{{ kpi.value }}</strong>
+          <span class="preview-kpi-change">▲ {{ kpi.change }}</span>
+        </div>
+      }
+    </div>
+    <div class="preview-chart" role="img" aria-label="Quarterly revenue 2025: Q1 €57.2m, Q2 €60.4m, Q3 €63.1m, Q4 €67.9m">
+      @for (bar of previewBars; track bar.label) {
+        <div class="preview-bar-col">
+          <div class="preview-bar" [style.height.%]="bar.height" [title]="bar.display"></div>
+          <span>{{ bar.label }}</span>
+        </div>
+      }
+    </div>
+    <figcaption>Quarterly revenue, 2025</figcaption>
+  </figure>
+
+  <section class="section" aria-labelledby="features-title">
+    <h2 id="features-title">What it does</h2>
+    <div class="feature-grid">
+      @for (feature of features; track feature.title) {
+        <article class="feature">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              @for (d of feature.icon; track $index) {
+                <path [attr.d]="d" />
+              }
+            </svg>
+          </span>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="audience-title">
+    <h2 id="audience-title">Who it's for</h2>
+    <p>
+      Annualflow is for anyone with a folder of messy financial reports who wants the figures clean and in one place.
+      Drop in your reports and it pulls out the key figures, lines up the periods and gives you back a tidy PDF,
+      Excel or JSON file.
+    </p>
+    <p>
+      For now it reads PDF financial reports, such as annual and interim reports, not receipts or scanned images.
+      It's open source, so you can see exactly how every figure is handled.
+    </p>
+  </section>
+
+  <section class="section" id="data-enrichment" aria-labelledby="enrichment-title">
+    <h2 id="enrichment-title">How Data Enrichment works</h2>
+    <p>
+      If you upload a second document for a company and period that already exist, it updates the existing
+      record. Annualflow does not create a duplicate.
+    </p>
+    <table class="example">
+      <caption>Example: two FY2024 documents for the same company</caption>
+      <thead>
+        <tr>
+          <th scope="col">Field</th>
+          <th scope="col">First upload</th>
+          <th scope="col">Later upload</th>
+          <th scope="col">Stored record</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Revenue</th><td>210.7m</td><td>210.7m</td><td>210.7m</td></tr>
+        <tr><th scope="row">Net profit</th><td>24.4m</td><td>24.6m</td><td>24.6m <span class="tag">conflict flagged</span></td></tr>
+        <tr><th scope="row">Cash</th><td>-</td><td>48.9m</td><td>48.9m <span class="tag">gap filled</span></td></tr>
+        <tr><th scope="row">EPS</th><td>-</td><td>0.61</td><td>0.61 <span class="tag">gap filled</span></td></tr>
+      </tbody>
+    </table>
+    <ul class="plain-list">
+      <li>Empty fields are filled. A value missing from a later document never erases a stored one.</li>
+      <li>If a value differs, the newer one is kept and the change is reported after the upload.</li>
+      <li>Each period keeps a link to every document it came from.</li>
+    </ul>
+    <a routerLink="/about" fragment="data-enrichment" class="text-link">More detail on the About page</a>
+  </section>
+
+  <section class="section" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <ol class="plain-list numbered">
+      @for (step of steps; track step) {
+        <li>{{ step }}</li>
+      }
+    </ol>
+  </section>
+
+</main>

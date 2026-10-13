@@ -1,8 +1,19 @@
 <section class="dashboard">
   <!-- Page title and short description -->
   <header class="dashboard-header">
+<<<<<<< HEAD
     <h1>Financial Dashboard</h1>
     <p>Select a company and reporting period to view financial performance and key metrics.</p>
+=======
+    <div class="dashboard-header-text">
+      <h1>Financial Dashboard</h1>
+      <p>Select a company and reporting period to view financial performance and key metrics.</p>
+    </div>
+    <a routerLink="/documents/new" class="create-report-button create-report-button--large">
+      <span aria-hidden="true">＋</span>
+      Create new report
+    </a>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   </header>
   @if (errorMessage) {
     <div class="dashboard-error" role="alert">
@@ -63,12 +74,19 @@
         <div class="report-header-main">
           <div class="report-field">
             <span class="report-label">Company</span>
+<<<<<<< HEAD
             <h2>{{ financialPeriod.financials.companyName }}</h2>
+=======
+            <h2>
+              {{ financialPeriod.financials.companyName }}
+            </h2>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
           </div>
 
           <div class="report-field">
             <span class="report-label">Reporting Period</span>
             <h2>{{ financialPeriod.financials.periodLabel }}</h2>
+<<<<<<< HEAD
           </div>
         </div>
 
@@ -165,6 +183,145 @@
             <h4>Customer Growth</h4>
             <app-customer-chart [history]="history" />
           </div>
+=======
+            @if (sourceDocumentCount > 0) {
+              <p class="source-meta">
+                <span>Sources: {{ sourceDocumentCount }} {{ sourceDocumentCount === 1 ? 'document' : 'documents' }}</span>
+                @if (sourceDocumentCount > 1) {
+                  <span class="enriched-text" title="Figures merged from several uploaded documents (Data Enrichment)">Enriched</span>
+                }
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="report-header-actions">
+          @if (selectedCompany && selectedPeriod) {
+            <div class="export-menu" (keydown.escape)="closeExportMenu(true)" (focusout)="onExportMenuFocusOut($event)">
+              <button
+                #exportTrigger
+                type="button"
+                class="board-report-button export-trigger"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="exportMenuOpen"
+                aria-controls="export-menu-list"
+                [disabled]="isExporting"
+                (click)="toggleExportMenu()"
+                (keydown.arrowDown)="openExportMenu($event)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+                </svg>
+                <span class="export-trigger-label">{{ isExporting ? 'Preparing…' : 'Export' }}</span>
+                <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+              @if (exportMenuOpen) {
+                <div id="export-menu-list" class="export-menu-list" role="menu" aria-label="Export" (keydown)="onExportMenuKeydown($event)">
+                  <div class="export-group" role="group" aria-labelledby="export-group-pdf">
+                    <span class="export-group-label" id="export-group-pdf">PDF</span>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('pdf-period')">This period</button>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('pdf-all')">All periods</button>
+                  </div>
+                  <div class="export-group" role="group" aria-labelledby="export-group-json">
+                    <span class="export-group-label" id="export-group-json">JSON</span>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('json-period')">This period</button>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('json-all')">All periods</button>
+                  </div>
+                  <div class="export-group" role="group" aria-labelledby="export-group-xlsx">
+                    <span class="export-group-label" id="export-group-xlsx">Excel</span>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('xlsx-period')">This period</button>
+                    <button type="button" role="menuitem" class="export-item" (click)="runExport('xlsx-all')">All periods</button>
+                  </div>
+                </div>
+              }
+            </div>
+            <app-ai-insight
+              [companyId]="selectedCompany.value"
+              [period]="selectedPeriod.value"
+              [companyName]="financialPeriod.financials.companyName"
+              [periodLabel]="financialPeriod.financials.periodLabel"
+              [initiallyOpen]="insightOpen"
+              (openChange)="onInsightOpenChange($event)"
+            />
+          }
+        </div>
+
+      </section>
+
+      @if (reportError) {
+      <p class="dashboard-error" role="alert">{{ reportError }}</p>
+    }
+
+    <!-- KPI cards: only metrics this report actually contains are shown -->
+      @if (kpiCards.length > 0) {
+        <div class="kpi-grid">
+          @for (card of kpiCards; track card.title) {
+            <app-kpi-card
+              [title]="card.title"
+              [format]="card.format"
+              [value]="card.value"
+              [change]="card.change"
+            />
+          }
+        </div>
+      } @else {
+        <p class="dashboard-status">No financial figures were extracted for this period.</p>
+      }
+    }
+
+    <!-- Historical charts: each chart only renders when its data exists -->
+    @if (showRevenueChart || showMarginsChart || showCustomerChart || showCashFlowChart) {
+      <section class="history-section">
+        <div class="history-heading">
+          <div>
+            <span>All Reports</span>
+            <h2>Performance Over Time</h2>
+          </div>
+
+          @if (chartPeriodKinds.length > 1) {
+            <div class="period-kind-toggle" role="group" aria-label="Chart periods">
+              @for (kind of chartPeriodKinds; track kind) {
+                <button
+                  type="button"
+                  [class.active]="kind === chartPeriodKind"
+                  [attr.aria-pressed]="kind === chartPeriodKind"
+                  (click)="onChartPeriodKindSelected(kind)">
+                  {{ periodKindLabel(kind) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="history-charts">
+          @if (showRevenueChart) {
+            <div class="history-chart-card">
+              <h4>Revenue</h4>
+              <app-revenue-chart [history]="chartHistory" />
+            </div>
+          }
+
+          @if (showMarginsChart) {
+            <div class="history-chart-card">
+              <h4>Profit Margins</h4>
+              <app-margins-chart [history]="chartHistory" />
+            </div>
+          }
+
+          @if (showCustomerChart) {
+            <div class="history-chart-card">
+              <h4>Customer Growth</h4>
+              <app-customer-chart [history]="chartHistory" />
+            </div>
+          }
+
+          @if (showCashFlowChart) {
+            <div class="history-chart-card">
+              <h4>Cash Flow vs Net Profit</h4>
+              <app-cash-flow-chart [history]="chartHistory" />
+            </div>
+          }
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         </div>
       </section>
     }

@@ -14,7 +14,15 @@ const stored = {
     cash: null,
     debt: null,
     customers: 8_500_000,
+<<<<<<< HEAD
     net_assets: null
+=======
+    net_assets: null,
+    operating_cash_flow: null,
+    total_assets: null,
+    total_liabilities: null,
+    eps: null
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 };
 
 const incoming = {
@@ -29,7 +37,15 @@ const incoming = {
     cash: null,
     debt: null,
     customers: null,
+<<<<<<< HEAD
     netAssets: null
+=======
+    netAssets: null,
+    operatingCashFlow: null,
+    totalAssets: null,
+    totalLiabilities: null,
+    eps: null
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 };
 
 test("reports only fields where a new non-null value replaces a different stored value", () => {

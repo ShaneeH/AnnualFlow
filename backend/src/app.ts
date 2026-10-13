@@ -5,8 +5,17 @@ import healthRoutes from "./routes/health.routes";
 import openAiRoutes from "./routes/openai.routes";
 import reportRoutes from "./routes/report.routes";
 import companiesRouter from "./routes/companies.routes";
+<<<<<<< HEAD
 
 import { apiLimiter } from "./middleware/rate-limit";
+=======
+import insightsRouter from "./routes/insights.routes";
+import authRouter from "./routes/auth.routes";
+
+import { apiLimiter } from "./middleware/rate-limit";
+import { attachUser, requireCsrfHeader } from "./middleware/auth";
+import { logServerError } from "./utils/errors";
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import {
     getAllowedOrigins,
     requestContext,
@@ -64,7 +73,12 @@ app.use(
             "Content-Type",
             "Authorization",
             "X-Request-Id",
+<<<<<<< HEAD
             "X-CSRF-Token"
+=======
+            "X-CSRF-Token",
+            "X-Requested-With"
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         ],
         exposedHeaders: [
             "Content-Disposition",
@@ -77,11 +91,21 @@ app.use(
 app.use(express.json({ limit: "100kb" }));
 
 app.use("/api", apiLimiter);
+<<<<<<< HEAD
 
+=======
+app.use("/api", attachUser, requireCsrfHeader);
+
+app.use("/api/auth", authRouter);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 app.use("/api/health", healthRoutes);
 app.use("/api/openai", openAiRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/companies", companiesRouter);
+<<<<<<< HEAD
+=======
+app.use("/api/insights", insightsRouter);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 app.use((_req, res) => {
     res.status(404).json({
@@ -126,10 +150,14 @@ app.use((
         return;
     }
 
+<<<<<<< HEAD
     console.error(
         `[http] unhandled request=${res.locals.requestId}`,
         error
     );
+=======
+    logServerError("http] [unhandled", res.locals.requestId, error);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     res.status(500).json({
         success: false,

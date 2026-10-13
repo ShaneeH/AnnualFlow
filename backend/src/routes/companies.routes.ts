@@ -1,7 +1,14 @@
 import { Router, Request, Response } from "express";
+<<<<<<< HEAD
 import { AppError } from "../utils/errors";
 import { PERIOD_PATTERN } from "../utils/report-validator";
 import { getCompanies,getCompanyPeriods,getFinancialPeriod,getCompanyHistory} from "../services/companies.service";
+=======
+import { AppError, logServerError } from "../utils/errors";
+import { PERIOD_PATTERN } from "../utils/report-validator";
+import { getCompanies,getCompanyPeriods,getFinancialPeriod,getCompanyHistory} from "../services/companies.service";
+import { viewerId } from "../middleware/auth";
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 const router = Router();
 
@@ -70,10 +77,14 @@ function handleError(res: Response, error: unknown) {
         return sendError(res, error.status, error.message);
     }
 
+<<<<<<< HEAD
     console.error(
         `[companies] request failed request=${res.locals.requestId}`,
         error
     );
+=======
+    logServerError("companies", res.locals.requestId, error);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     return sendError(res, 500, "Failed to retrieve company data.");
 }
@@ -96,9 +107,15 @@ function validateCompanyId(
 
 // GET /
 // Returns all companies currently stored in the database.
+<<<<<<< HEAD
 router.get("/", async (_req, res) => {
     try {
         return res.json(await getCompanies());
+=======
+router.get("/", async (req, res) => {
+    try {
+        return res.json(await getCompanies(viewerId(req)));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     } catch (error) {
         return handleError(res, error);
     }
@@ -113,7 +130,11 @@ router.get("/:companyId/periods", async (req, res) => {
     if (companyId === null) return;
 
     try {
+<<<<<<< HEAD
         const periods = await getCompanyPeriods(companyId);
+=======
+        const periods = await getCompanyPeriods(companyId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         if (!periods.length) {
             return sendError(res, 404, "No financial periods found.");
@@ -151,6 +172,10 @@ router.get("/:companyId/periods/:period", async (req, res) => {
         const financialPeriod = await getFinancialPeriod(
             companyId,
             period,
+<<<<<<< HEAD
+=======
+            viewerId(req),
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             compareTo
         );
 
@@ -173,7 +198,11 @@ router.get("/:companyId/history", async (req, res) => {
     if (companyId === null) return;
 
     try {
+<<<<<<< HEAD
         const history = await getCompanyHistory(companyId);
+=======
+        const history = await getCompanyHistory(companyId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         if (!history.length) {
             return sendError(res, 404, "No company history found.");

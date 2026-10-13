@@ -1,0 +1,107 @@
+<button
+  type="button"
+  class="insights-button"
+  aria-label="Get insights"
+  title="Get insights"
+  [attr.aria-expanded]="isOpen"
+  aria-controls="ai-insight-panel"
+  (click)="open()"
+>
+  <app-mascot class="insights-mascot" [size]="20" />
+  <span class="insights-label">Get insights</span>
+</button>
+
+@if (isOpen) {
+  <div class="insight-backdrop" (click)="close()" aria-hidden="true"></div>
+
+  <aside
+    id="ai-insight-panel"
+    class="insight-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ai-insight-title"
+  >
+    <header class="panel-header">
+      <div>
+        <span class="panel-eyebrow"><app-mascot [size]="18" /> Insights</span>
+        <h2 id="ai-insight-title">{{ companyName() || 'Company' }}</h2>
+        @if (periodLabel()) {
+          <p class="panel-period">{{ periodLabel() }}</p>
+        }
+      </div>
+      <button type="button" class="close-button" aria-label="Close insights" (click)="close()">×</button>
+    </header>
+
+    <div class="panel-body" aria-live="polite">
+      <span class="visually-hidden" aria-live="polite">{{ copied ? 'Insight copied to clipboard' : '' }}</span>
+      @switch (state) {
+        @case ('loading') {
+          <p class="panel-status">Loading…</p>
+        }
+
+        @case ('thinking') {
+          <div class="thinking" role="status">
+            <div class="thinking-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p>Analysing the numbers…</p>
+            <div class="skeleton"></div>
+            <div class="skeleton short"></div>
+            <div class="skeleton"></div>
+          </div>
+        }
+
+        @case ('empty') {
+          <div class="empty-state">
+            <p>No insights have been generated for this period yet.</p>
+            <p class="muted">Ledger explains this report's KPIs, margins and changes versus the previous period.</p>
+            <button type="button" class="primary-button" (click)="generate()">Get insights</button>
+          </div>
+        }
+
+        @case ('error') {
+          <div class="error-state" role="alert">
+            <p>{{ errorMessage }}</p>
+            <button type="button" class="primary-button" (click)="load()">Try again</button>
+          </div>
+        }
+
+        @case ('ready') {
+          @if (insight) {
+            <section class="insight-card summary-card">
+              <h3><span aria-hidden="true">✨</span> Performance summary</h3>
+              <p>{{ insight.content.performanceSummary }}</p>
+            </section>
+
+            @for (section of sections; track section.key) {
+              @if (insight.content[section.key].length) {
+                <section class="insight-card">
+                  <h3><span aria-hidden="true">{{ section.icon }}</span> {{ section.title }}</h3>
+                  <ul>
+                    @for (point of insight.content[section.key]; track $index) {
+                      <li>{{ point }}</li>
+                    }
+                  </ul>
+                </section>
+              }
+            }
+
+            <p class="generated-meta">
+              Generated {{ insight.generatedAt | date: 'medium' }} · {{ insight.model }}
+            </p>
+          }
+        }
+      }
+    </div>
+
+    <footer class="panel-footer">
+      <p class="disclaimer">{{ disclaimer }}</p>
+      @if (state === 'ready') {
+        <div class="footer-actions">
+          <button type="button" class="secondary-button copy-button" (click)="copy()" [attr.aria-label]="copied ? 'Copied' : 'Copy insight'">
+            {{ copied ? '✓ Copied!' : copyFailed ? 'Copy failed' : '⧉ Copy' }}
+          </button>
+          <button type="button" class="secondary-button" (click)="generate(true)">↻ Regenerate</button>
+        </div>
+      }
+    </footer>
+  </aside>
+}

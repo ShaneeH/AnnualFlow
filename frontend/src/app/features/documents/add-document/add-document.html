@@ -1,5 +1,6 @@
 <section class="add-document">
   <header class="page-header">
+<<<<<<< HEAD
     <span class="page-eyebrow">Document Import</span>
     <h1>Add Financial Document</h1>
     <p>
@@ -67,12 +68,94 @@
         >
           @if (isUploading) {
             <span class="spinner"></span>
+=======
+    <h1>Add Financial Document</h1>
+    <p>Upload a company's annual or interim report and the key figures are extracted and stored by period.</p>
+  </header>
+
+  <input
+    #fileInput
+    type="file"
+    accept=".pdf,application/pdf"
+    hidden
+    (change)="onFileSelected($event)"
+  />
+
+  @if (!successMessage) {
+    @if (!selectedFile) {
+      <div
+        class="drop-zone"
+        [class.dragging]="isDragging"
+        role="button"
+        tabindex="0"
+        aria-label="Choose a PDF or drop it here"
+        (click)="fileInput.click()"
+        (keydown.enter)="fileInput.click()"
+        (keydown.space)="$event.preventDefault(); fileInput.click()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15V4M12 4L7.5 8.5M12 4l4.5 4.5" />
+          <path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" />
+        </svg>
+        <p class="drop-title">{{ isDragging ? 'Drop the PDF to add it' : 'Drag a PDF here, or click to choose one' }}</p>
+        <p class="drop-hint">PDF only, up to {{ maxSizeMb }} MB</p>
+
+        <span class="ledger" aria-hidden="true">
+          <app-mascot [size]="26" />
+          <span>Ledger will read it for you</span>
+        </span>
+      </div>
+    } @else {
+      <div class="selected-file">
+        <svg class="file-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5" />
+        </svg>
+        <div class="file-meta">
+          <span class="file-name">{{ selectedFile.name }}</span>
+          <span class="file-size">{{ fileSize(selectedFile.size) }}</span>
+        </div>
+        <button type="button" class="text-button" [disabled]="isUploading" (click)="removeFile(fileInput)">
+          Remove
+        </button>
+      </div>
+    }
+
+    @if (rejectionMessage) {
+      <div class="rejection-card" role="alert">
+        <div class="rejection-title">
+          <span>Not a financial report. Nothing was saved.</span>
+          <button type="button" class="text-button" (click)="fileInput.click()">Choose a different PDF</button>
+        </div>
+        <p>{{ rejectionMessage }}</p>
+        <p class="rejection-hint">Only company financial reports (annual/interim reports, financial statements) are accepted.</p>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <p class="error-message" role="alert">{{ errorMessage }}</p>
+    }
+
+    @if (selectedFile) {
+      <div class="upload-actions">
+        <button type="button" class="upload-button" [disabled]="isUploading" (click)="uploadDocument()">
+          @if (isProcessing) {
+            <span class="spinner" aria-hidden="true"></span>
+            Processing… you can leave this page, we'll notify you
+          } @else if (isUploading) {
+            <span class="spinner" aria-hidden="true"></span>
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             Analysing document…
           } @else {
             Analyse document
           }
         </button>
       </div>
+<<<<<<< HEAD
     } @else {
       <div class="upload-success">
         <div class="success-icon">
@@ -113,4 +196,26 @@
     }
   </div>
 
+=======
+    }
+  } @else {
+    <div class="upload-success">
+      <svg class="success-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17L4 12" />
+      </svg>
+      <h2>{{ uploadedFileName }}</h2>
+      <p>{{ successMessage }}</p>
+      @if (conflictMessage) {
+        <p class="conflict-message">{{ conflictMessage }}</p>
+      }
+      <p class="success-note">This report is now available in your dashboard.</p>
+
+      <div class="success-actions">
+        <a class="upload-button" routerLink="/dashboard">View in dashboard</a>
+        <button type="button" class="text-button" (click)="resetUpload()">Upload another document</button>
+      </div>
+    </div>
+  }
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 </section>

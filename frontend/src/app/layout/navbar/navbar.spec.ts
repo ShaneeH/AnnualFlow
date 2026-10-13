@@ -25,4 +25,37 @@ describe('Navbar', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+<<<<<<< HEAD
 });
+=======
+
+  it('should show "Annualflow" as a link to the home page', () => {
+    const logo: HTMLAnchorElement | null =
+      fixture.nativeElement.querySelector('a.navbar-logo');
+
+    expect(logo?.textContent?.trim()).toBe('Annualflow');
+    expect(logo?.getAttribute('href')).toBe('/');
+  });
+
+  it('has an accessible hamburger button that toggles the links', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    const button = el.querySelector<HTMLButtonElement>('.menu-toggle')!;
+    const links = el.querySelector('#navbar-links')!;
+
+    expect(button.getAttribute('aria-controls')).toBe('navbar-links');
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(button.getAttribute('aria-label')).toBe('Open menu');
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(button.getAttribute('aria-label')).toBe('Close menu');
+    expect(links.classList).toContain('open');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(links.classList).not.toContain('open');
+  });
+});
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

@@ -153,3 +153,106 @@ button:hover {
     letter-spacing: -0.01em;
 }
 
+<<<<<<< HEAD
+=======
+
+/* Primary "create report" call to action (dashboard + My Reports). */
+.create-report-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.create-report-button:hover {
+  background: #e4e4e7;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.08);
+}
+
+.create-report-button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.create-report-button--large {
+  padding: 0.9rem 1.6rem;
+  font-size: 1.05rem;
+}
+
+/* Dashboard "Board report" button */
+.board-report-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--surface-light), var(--surface));
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.board-report-button svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+
+.board-report-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.board-report-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.board-report-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Dashboard action stack: Board report, Company report, AI Insight and the
+   share one width and a square-ish shape. */
+.report-header-actions .board-report-button,
+.report-header-actions app-ai-insight,
+.report-header-actions app-ai-insight .robot-button {
+  width: 100%;
+  box-sizing: border-box;
+}
+.report-header-actions .board-report-button,
+.report-header-actions app-ai-insight .robot-button {
+  justify-content: flex-start;
+  min-height: 2.6rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  background: var(--surface-light);
+  box-shadow: none;
+  transform: none;
+}
+.report-header-actions app-ai-insight .robot-button:hover,
+.report-header-actions .board-report-button:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+.report-header-actions app-ai-insight .robot-icon {
+  width: 22px;
+  height: 22px;
+}
+.report-header-actions .board-report-button { text-align: left; white-space: nowrap; }
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

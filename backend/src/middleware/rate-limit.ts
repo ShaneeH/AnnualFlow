@@ -46,3 +46,31 @@ export const exportLimiter = rateLimit({
         error: "Too many export requests. Please try again later."
     }
 });
+<<<<<<< HEAD
+=======
+
+// AI insight generation calls the model, so it gets its own strict allowance.
+// Only POST (generation) uses this; reading a cached insight does not.
+export const insightLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: "Too many AI insight requests. Please try again later."
+    }
+});
+
+// Sign-in attempts (each one verifies a Google ID token).
+export const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: "Too many sign-in attempts. Please try again later."
+    }
+});
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

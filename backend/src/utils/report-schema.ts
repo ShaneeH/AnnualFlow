@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { REPORT_TYPES } from "./report-validator";
+=======
+import { DOCUMENT_TYPES, REPORT_TYPES } from "./report-validator";
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 const nullableNumber = { type: ["number", "null"] };
 const nullableDate = {
@@ -12,6 +16,10 @@ export const financialReportSchema = {
     type: "object",
     additionalProperties: false,
     required: [
+<<<<<<< HEAD
+=======
+        "classification",
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         "company",
         "reportName",
         "reportType",
@@ -21,6 +29,20 @@ export const financialReportSchema = {
         "periods"
     ],
     properties: {
+<<<<<<< HEAD
+=======
+        classification: {
+            type: "object",
+            additionalProperties: false,
+            required: ["isFinancialReport", "documentType", "confidence", "reason"],
+            properties: {
+                isFinancialReport: { type: "boolean" },
+                documentType: { type: "string", enum: [...DOCUMENT_TYPES] },
+                confidence: { type: "number" },
+                reason: { type: "string" }
+            }
+        },
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         company: { type: "string" },
         reportName: { type: "string" },
         reportType: { type: "string", enum: [...REPORT_TYPES] },
@@ -34,7 +56,11 @@ export const financialReportSchema = {
         source: { type: ["string", "null"] },
         periods: {
             type: "array",
+<<<<<<< HEAD
             minItems: 1,
+=======
+            minItems: 0,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             maxItems: 40,
             items: {
                 type: "object",
@@ -51,7 +77,15 @@ export const financialReportSchema = {
                     "cash",
                     "debt",
                     "customers",
+<<<<<<< HEAD
                     "netAssets"
+=======
+                    "netAssets",
+                    "operatingCashFlow",
+                    "totalAssets",
+                    "totalLiabilities",
+                    "eps"
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
                 ],
                 properties: {
                     period: {
@@ -68,7 +102,15 @@ export const financialReportSchema = {
                     cash: nullableNumber,
                     debt: nullableNumber,
                     customers: nullableNumber,
+<<<<<<< HEAD
                     netAssets: nullableNumber
+=======
+                    netAssets: nullableNumber,
+                    operatingCashFlow: nullableNumber,
+                    totalAssets: nullableNumber,
+                    totalLiabilities: nullableNumber,
+                    eps: nullableNumber
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
                 }
             }
         }

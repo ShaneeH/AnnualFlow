@@ -3,12 +3,19 @@ import multer from "multer";
 
 import {
     deleteFinancialDocument,
+<<<<<<< HEAD
     documentExistsByHash,
     DuplicateDocumentError,
     getDocumentById,
     getDocuments,
     getDocumentStats,
     saveFinancialDocument
+=======
+    DuplicateDocumentError,
+    getDocumentById,
+    getDocuments,
+    getDocumentStats
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 } from "../services/documents.service";
 import {
     createReportCsv,
@@ -16,23 +23,84 @@ import {
     createReportPdf,
     getReportExportFilename
 } from "../services/report-export.service";
+<<<<<<< HEAD
 import { deletePDF, analysePDF, uploadPDF } from "../services/openai.service";
+=======
+import { getJobMode, JobStore, postgresJobStore } from "../services/jobs.service";
+import { deletePDF } from "../services/openai.service";
+import { ReportWorker } from "../services/report-worker";
+import { generateDocumentHash } from "../utils/document-hash";
+import {
+    defaultReportProcessingDeps,
+    processReportUpload
+} from "../services/report-processing.service";
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import {
     exportLimiter,
     uploadLimiter
 } from "../middleware/rate-limit";
+<<<<<<< HEAD
 import { generateDocumentHash } from "../utils/document-hash";
+=======
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import {
     maxPdfBytes,
     PdfUploadError,
     validatePdfUpload
 } from "../utils/pdf-upload";
 import { ProcessingIndicator } from "../utils/processing-indicator";
+<<<<<<< HEAD
 import { analysePrompt } from "../utils/prompts";
 import { AppError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
 import { parseAndValidateReport } from "../utils/report-validator";
 
 const router = Router();
+=======
+import { requireAuth, viewerId } from "../middleware/auth";
+import { analysePrompt } from "../utils/prompts";
+import {
+    AppError,
+    NotFinancialReportError,
+    ServiceConfigError,
+    logServerError,
+    toUpstreamAppError
+} from "../utils/errors";
+import { parseAndValidateReport } from "../utils/report-validator";
+
+const router = Router();
+
+// ---- Background jobs -------------------------------------------------------
+
+interface JobRuntime {
+    mode: "sync" | "async";
+    store: JobStore;
+    worker: ReportWorker;
+    documentExistsByHash: (hash: string, ownerId: number) => Promise<boolean>;
+}
+
+let jobRuntime: JobRuntime | null = null;
+
+/** Lazily created so tests can override it with configureReportJobs. */
+export function getJobRuntime(): JobRuntime {
+    jobRuntime ??= {
+        mode: getJobMode(),
+        store: postgresJobStore,
+        worker: new ReportWorker({
+            describe: error => uploadErrorResponse(error).body
+        }),
+        documentExistsByHash: defaultReportProcessingDeps.documentExistsByHash
+    };
+    return jobRuntime;
+}
+
+/** Test/bootstrap hook to replace the job mode, store or worker. */
+export function configureReportJobs(overrides: Partial<JobRuntime>): JobRuntime {
+    jobRuntime = { ...getJobRuntime(), ...overrides };
+    return jobRuntime;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 const MAX_ID = 2_147_483_647;
 
 const upload = multer({
@@ -91,10 +159,55 @@ function logRouteError(
     context: string,
     error: unknown
 ): void {
+<<<<<<< HEAD
     console.error(
         `[reports] ${context} request=${res.locals.requestId}`,
         error
     );
+=======
+    logServerError(`reports] [${context}`, res.locals.requestId, error);
+}
+
+/**
+ * Maps any upload-processing failure to an HTTP status and a specific,
+ * user-facing message. Exported for tests.
+ */
+export function uploadErrorResponse(error: unknown): {
+    status: number;
+    body: { error: string; code?: string };
+} {
+    if (error instanceof DuplicateDocumentError) {
+        return { status: 409, body: { error: error.message, code: "DUPLICATE_DOCUMENT" } };
+    }
+
+    if (error instanceof PdfUploadError) {
+        return { status: error.status, body: { error: error.message } };
+    }
+
+    if (error instanceof NotFinancialReportError) {
+        return { status: 422, body: { error: error.message, code: "NOT_FINANCIAL_REPORT" } };
+    }
+
+    if (error instanceof ServiceConfigError) {
+        return {
+            status: 503,
+            body: { error: "The document analysis service is not configured (OPENAI_API_KEY is missing)." }
+        };
+    }
+
+    const appError = error instanceof AppError ? error : toUpstreamAppError(error);
+    if (appError) {
+        return { status: appError.status, body: { error: appError.message } };
+    }
+
+    return {
+        status: 500,
+        body: {
+            error: "The document could not be processed due to an unexpected server error. " +
+                "The server log has the details for this request ID."
+        }
+    };
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 function uploadSinglePdf(
@@ -158,6 +271,10 @@ router.get("/", async (req, res) => { const companyId = req.query.companyId === 
 
     try {
         return res.json(await getDocuments({
+<<<<<<< HEAD
+=======
+            viewerId: viewerId(req),
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             companyId: companyId ?? undefined,
             limit: limit ?? undefined,
             offset: offset ?? undefined
@@ -168,9 +285,33 @@ router.get("/", async (req, res) => { const companyId = req.query.companyId === 
     }
 });
 
+<<<<<<< HEAD
 router.get("/stats", async (_req, res) => {
     try {
         return res.json(await getDocumentStats());
+=======
+router.get("/jobs/:jobId", requireAuth, async (req, res) => {
+    const jobId = String(req.params.jobId ?? "");
+    if (!UUID_PATTERN.test(jobId)) {
+        return sendError(res, 400, "Invalid job ID.");
+    }
+
+    try {
+        const job = await getJobRuntime().store.getJob(jobId, req.user!.id);
+        return job
+            ? res.json(job)
+            : sendError(res, 404, "Job not found.");
+    } catch (error) {
+        logRouteError(res, "job status failed", error);
+        const { status, body } = uploadErrorResponse(error);
+        return sendError(res, status, body.error);
+    }
+});
+
+router.get("/stats", async (req, res) => {
+    try {
+        return res.json(await getDocumentStats(viewerId(req)));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     } catch (error) {
         logRouteError(res, "stats failed", error);
         return sendError(res, 500, "Failed to retrieve document statistics.");
@@ -184,7 +325,11 @@ router.get("/:documentId", async (req, res) => {
     }
 
     try {
+<<<<<<< HEAD
         const document = await getDocumentById(documentId);
+=======
+        const document = await getDocumentById(documentId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         return document
             ? res.json(document)
             : sendError(res, 404, "Document not found.");
@@ -201,7 +346,11 @@ router.get("/:documentId/export.pdf", exportLimiter, async (req, res) => {
     }
 
     try {
+<<<<<<< HEAD
         const document = await getDocumentById(documentId);
+=======
+        const document = await getDocumentById(documentId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const pdf = createReportPdf(document);
@@ -225,7 +374,11 @@ router.get("/:documentId/export.csv", exportLimiter, async (req, res) => {
     }
 
     try {
+<<<<<<< HEAD
         const document = await getDocumentById(documentId);
+=======
+        const document = await getDocumentById(documentId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const csv = createReportCsv(document);
@@ -248,7 +401,11 @@ router.get("/:documentId/export.json", exportLimiter, async (req, res) => {
     }
 
     try {
+<<<<<<< HEAD
         const document = await getDocumentById(documentId);
+=======
+        const document = await getDocumentById(documentId, viewerId(req));
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const json = createReportJson(document);
@@ -266,13 +423,20 @@ router.get("/:documentId/export.json", exportLimiter, async (req, res) => {
 
 router.post(
     "/add",
+<<<<<<< HEAD
+=======
+    requireAuth,
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     uploadLimiter,
     uploadSinglePdf,
     async (req, res) => {
         const progress = new ProcessingIndicator(
             String(res.locals.requestId ?? "unknown")
         );
+<<<<<<< HEAD
         let uploadedPdfId: string | null = null;
+=======
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         try {
             if (!req.file) {
@@ -282,6 +446,7 @@ router.post(
             progress.start("Validating PDF");
             validatePdfUpload(req.file);
 
+<<<<<<< HEAD
             const pdf = req.file.buffer;
             const documentHash = generateDocumentHash(pdf);
 
@@ -305,19 +470,63 @@ router.post(
             );
 
             progress.succeed(`Saved ${report.reportName}`);
+=======
+            const runtime = getJobRuntime();
+
+            if (runtime.mode === "async") {
+                // Queue it and return immediately; the worker does the slow part.
+                const documentHash = generateDocumentHash(req.file.buffer);
+                if (await runtime.documentExistsByHash(documentHash, req.user!.id)) {
+                    throw new DuplicateDocumentError();
+                }
+
+                const job = await runtime.store.createJob({
+                    originalName: req.file.originalname,
+                    documentHash,
+                    pdf: req.file.buffer,
+                    requestId: String(res.locals.requestId ?? "") || null,
+                    userId: req.user!.id
+                });
+                runtime.worker.kick();
+                progress.succeed(`Queued job ${job.jobId}`);
+
+                return res.status(202).json({
+                    success: true,
+                    message: "The PDF was accepted and is being analysed.",
+                    jobId: job.jobId,
+                    status: job.status,
+                    statusUrl: `/api/reports/jobs/${job.jobId}`
+                });
+            }
+
+            const result = await processReportUpload(
+                req.file.buffer,
+                req.file.originalname,
+                req.user!.id,
+                defaultReportProcessingDeps,
+                stage => progress.update(stage)
+            );
+
+            progress.succeed(`Saved ${result.report.reportName}`);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
             return res.status(201).json({
                 success: true,
                 message: "The PDF was successfully uploaded and analysed.",
+<<<<<<< HEAD
                 documentId,
                 uploadedPdfId,
                 documentHash,
                 report,
                 conflicts
+=======
+                ...result
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             });
         } catch (error) {
             progress.fail("Document processing failed");
 
+<<<<<<< HEAD
             if (uploadedPdfId) {
                 await deletePDF(uploadedPdfId);
             }
@@ -352,18 +561,47 @@ router.post(
                 500,
                 "The document could not be processed. Check the request ID in the server logs."
             );
+=======
+            if (
+                !(error instanceof DuplicateDocumentError) &&
+                !(error instanceof PdfUploadError)
+            ) {
+                logRouteError(
+                    res,
+                    error instanceof NotFinancialReportError
+                        ? "rejected non-financial document"
+                        : "processing failed",
+                    error
+                );
+            }
+
+            const { status, body } = uploadErrorResponse(error);
+            return res.status(status).json({
+                success: false,
+                ...body,
+                requestId: res.locals.requestId
+            });
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         }
     }
 );
 
+<<<<<<< HEAD
 router.delete("/:documentId", async (req, res) => {
+=======
+router.delete("/:documentId", requireAuth, async (req, res) => {
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     const documentId = parsePositiveInteger(req.params.documentId);
     if (documentId === null) {
         return sendError(res, 400, "Invalid document ID.");
     }
 
     try {
+<<<<<<< HEAD
         const deleted = await deleteFinancialDocument(documentId);
+=======
+        const deleted = await deleteFinancialDocument(documentId, req.user!.id);
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!deleted) {
             return sendError(res, 404, "Document not found.");
         }

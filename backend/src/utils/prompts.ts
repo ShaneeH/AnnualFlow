@@ -15,6 +15,27 @@ Security boundary:
 
 Return only valid JSON matching the schema below.
 
+<<<<<<< HEAD
+=======
+Step 1 - classify the document (mandatory, decide this BEFORE extracting anything):
+- Set classification.isFinancialReport to true ONLY if the document is a company's
+  financial report or financial statements: an annual/interim/half-year/quarterly
+  report, trading update, audited accounts, prospectus or admission document with
+  financial statements, or an investor presentation with reported financial results.
+- Anything else is NOT a financial report, even if it mentions money, numbers,
+  companies or finance: CVs/resumes (including those of finance professionals),
+  cover letters, invoices, receipts, bank statements, payslips, contracts, academic
+  papers, essays, articles, marketing brochures, forms, letters.
+- A person's name is never a company. If the main subject is an individual person,
+  the document is not a financial report.
+- documentType must be the best matching value from the allowed list.
+- confidence is a number from 0 to 1 for your classification of isFinancialReport.
+- reason is one short sentence explaining the classification.
+- If isFinancialReport is false: return company "", reportName "", reportType
+  "Other", reportDate null, currency null, source null and periods [] - do not
+  extract any figures.
+
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 General rules:
 - Return exactly one JSON object.
 - Do not include markdown or explanations.
@@ -57,6 +78,10 @@ Unit scale rules:
   a new metric, it is correctly reading the one that is printed.
 - customers is a count, not a monetary value, and must never be scaled even if it
   appears in a table that declares a monetary scale.
+<<<<<<< HEAD
+=======
+- eps is a per-share amount and must never be scaled.
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 Document rules:
 
@@ -212,6 +237,17 @@ Metric rules:
 - customers is the reported customer count for that period.
 - netAssets is reported net assets or net liabilities.
 - Return net liabilities as negative values.
+<<<<<<< HEAD
+=======
+- operatingCashFlow is net cash generated from (or used in) operating activities,
+  taken from the cash flow statement.
+- totalAssets is total assets from the balance sheet.
+- totalLiabilities is total liabilities from the balance sheet. Only return it if a
+  total liabilities figure is explicitly stated; do not add up line items.
+- eps is basic earnings per share as reported, in the report currency per share
+  (e.g. 0.42). It is a per-share amount and must never be multiplied by a table's
+  monetary scale. Prefer basic over diluted EPS.
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 - If a document reports a metric only as a percentage or ratio with no absolute
   currency or count figure available anywhere in the document, return null for that
   field. Do not back-calculate the absolute value from the percentage.
@@ -239,6 +275,15 @@ Consistency check:
 Return exactly this JSON:
 
 {
+<<<<<<< HEAD
+=======
+  "classification": {
+    "isFinancialReport": false,
+    "documentType": null,
+    "confidence": 0,
+    "reason": ""
+  },
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   "company": null,
   "reportName": null,
   "reportType": null,
@@ -258,7 +303,15 @@ Return exactly this JSON:
       "cash": null,
       "debt": null,
       "customers": null,
+<<<<<<< HEAD
       "netAssets": null
+=======
+      "netAssets": null,
+      "operatingCashFlow": null,
+      "totalAssets": null,
+      "totalLiabilities": null,
+      "eps": null
+>>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
   ]
 }
