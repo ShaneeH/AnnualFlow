@@ -12,10 +12,7 @@ import {
 } from '../models/document.model';
 import { FinancialPeriod } from '../models/financial-period.model';
 import { HistoryPeriod } from '../models/history-period.model';
-<<<<<<< HEAD
-=======
 import { QueuedUploadResponse } from '../models/report-job.model';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import { UploadReportResponse } from '../models/upload-report.model';
 
 @Injectable({
@@ -58,20 +55,12 @@ export class CompanyService {
   }
 
   // Send the selected PDF to the backend as multipart form data.
-<<<<<<< HEAD
-  addDocument(file: File): Observable<UploadReportResponse> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return this.http.post<UploadReportResponse>(
-=======
   // 201 = processed synchronously; 202 = queued as a background job.
   addDocument(file: File): Observable<UploadReportResponse | QueuedUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
     return this.http.post<UploadReportResponse | QueuedUploadResponse>(
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
       `${environment.apiUrl}/reports/add`,
       formData
     );

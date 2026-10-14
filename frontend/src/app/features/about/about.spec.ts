@@ -1,42 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-<<<<<<< HEAD
-=======
 import { provideRouter } from '@angular/router';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 import { About } from './about';
 
 describe('About', () => {
   let component: About;
   let fixture: ComponentFixture<About>;
-<<<<<<< HEAD
-=======
   let el: HTMLElement;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [About],
-<<<<<<< HEAD
-=======
       providers: [provideRouter([])]
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }).compileComponents();
 
     fixture = TestBed.createComponent(About);
     component = fixture.componentInstance;
     fixture.detectChanges();
-<<<<<<< HEAD
-=======
     el = fixture.nativeElement;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-<<<<<<< HEAD
-=======
 
   it('describes it as an open source project', () => {
     expect(el.querySelector('.lead')?.textContent).toContain('An open source project by Shane Hahesy');
@@ -65,5 +51,4 @@ describe('About', () => {
     expect(el.querySelector('#limits-title')).toBeNull();
     expect(el.textContent).not.toContain('Current limitations');
   });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 });

@@ -24,8 +24,6 @@ export interface FinancialReportPeriod {
 
     netAssets: number | null;
 
-<<<<<<< HEAD
-=======
     operatingCashFlow: number | null;
 
     totalAssets: number | null;
@@ -34,5 +32,4 @@ export interface FinancialReportPeriod {
 
     eps: number | null;
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }

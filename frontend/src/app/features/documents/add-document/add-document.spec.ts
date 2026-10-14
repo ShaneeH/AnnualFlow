@@ -1,20 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-<<<<<<< HEAD
-import { of, throwError } from 'rxjs';
-=======
 import { of, Subject, throwError } from 'rxjs';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import { vi } from 'vitest';
 
 import { AddDocument } from './add-document';
 import { CompanyService } from '../../../core/services/company.service';
-<<<<<<< HEAD
-=======
 import { UploadJobsService } from '../../../core/services/upload-jobs.service';
 import { ReportJob } from '../../../core/models/report-job.model';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 describe('AddDocument', () => {
   let component: AddDocument;
@@ -24,10 +17,6 @@ describe('AddDocument', () => {
     addDocument: vi.fn()
   };
 
-<<<<<<< HEAD
-  beforeEach(async () => {
-    vi.clearAllMocks();
-=======
   let jobUpdates: Subject<ReportJob>;
   const uploadJobs = { track: vi.fn() };
 
@@ -40,18 +29,13 @@ describe('AddDocument', () => {
     vi.clearAllMocks();
     jobUpdates = new Subject<ReportJob>();
     uploadJobs.track.mockReturnValue(jobUpdates.asObservable());
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     await TestBed.configureTestingModule({
       imports: [AddDocument],
       providers: [
         provideRouter([]),
-<<<<<<< HEAD
-        { provide: CompanyService, useValue: companyService }
-=======
         { provide: CompanyService, useValue: companyService },
         { provide: UploadJobsService, useValue: uploadJobs }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
       ]
     }).compileComponents();
 
@@ -195,8 +179,6 @@ describe('AddDocument', () => {
 
     expect(component.isUploading).toBe(false);
   });
-<<<<<<< HEAD
-=======
 
   it('should show a dedicated rejection card for non-financial documents', () => {
     component.selectedFile = new File(['%PDF-'], 'shane-cv.pdf', {
@@ -326,5 +308,4 @@ describe('AddDocument', () => {
     expect(component.selectedFile).toBeNull();
     expect(component.errorMessage).toBe('Please select a PDF document.');
   });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 });

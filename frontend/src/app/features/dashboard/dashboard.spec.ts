@@ -2,9 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
 import { vi } from 'vitest';
 
-<<<<<<< HEAD
-import { Dashboard } from './dashboard';
-=======
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 
 import { Dashboard, buildKpiCards } from './dashboard';
@@ -12,7 +9,6 @@ import { BoardReportService } from '../../core/services/board-report.service';
 import { CompanyReportService } from '../../core/services/company-report.service';
 import { FindingsExportService } from '../../core/services/findings-export.service';
 import { DASHBOARD_STATE_KEY, loadDashboardState } from './dashboard-state';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import { CompanyService } from '../../core/services/company.service';
 
 describe('Dashboard', () => {
@@ -27,14 +23,9 @@ describe('Dashboard', () => {
   };
 
   beforeEach(async () => {
-<<<<<<< HEAD
-    // Reset mocks before every test.
-    vi.clearAllMocks();
-=======
     // Reset mocks and persisted state before every test.
     vi.clearAllMocks();
     localStorage.clear();
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     companyService.getCompanies.mockReturnValue(of([]));
     companyService.getPeriods.mockReturnValue(of([]));
@@ -43,10 +34,7 @@ describe('Dashboard', () => {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
       providers: [
-<<<<<<< HEAD
-=======
         provideRouter([]),
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         { provide: CompanyService, useValue: companyService }
       ]
     }).compileComponents();
@@ -83,8 +71,6 @@ describe('Dashboard', () => {
     ]);
   });
 
-<<<<<<< HEAD
-=======
   it('should label example dataset companies and show a Example dataset badge for them', () => {
     companyService.getCompanies.mockReturnValue(of([
       { companyId: 1, companyName: 'Senus PLC', isExample: false },
@@ -100,7 +86,6 @@ describe('Dashboard', () => {
     expect(component.isExampleCompany).toBe(false);
   });
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   it('should load periods and history when a company is selected', () => {
     component.onCompanySelected({
       label: 'Senus PLC',
@@ -229,8 +214,6 @@ describe('Dashboard', () => {
     expect(component.errorMessage).toBe('Failed to load companies.');
     expect(component.isLoadingCompanies).toBe(false);
   });
-<<<<<<< HEAD
-=======
 
   it('should link the hero button to the create report flow', () => {
     const link: HTMLAnchorElement | null =
@@ -579,5 +562,4 @@ describe('Dashboard', () => {
     await component.runExport('json-all');
     expect(json).toHaveBeenCalledWith(1, 'Senus PLC', null, 'json');
   });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 });

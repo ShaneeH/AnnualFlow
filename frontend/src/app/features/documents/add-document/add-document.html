@@ -1,74 +1,5 @@
 <section class="add-document">
   <header class="page-header">
-<<<<<<< HEAD
-    <span class="page-eyebrow">Document Import</span>
-    <h1>Add Financial Document</h1>
-    <p>
-      Upload a financial report and ReportHub will analyse the
-      document and extract the available financial data.
-    </p>
-  </header>
-
-  <div class="upload-card">
-    <input
-      #fileInput
-      type="file"
-      accept=".pdf,application/pdf"
-      hidden
-      (change)="onFileSelected($event)"
-    />
-
-    @if (!successMessage) {
-      <div
-        class="upload-area"
-        [class.has-file]="selectedFile"
-        (click)="fileInput.click()"
-      >
-      
-
-        @if (!selectedFile) {
-          <div class="upload-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 16V4M12 4L7 9M12 4l5 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <h2>Select a financial report</h2>
-          <p>Click here to choose a PDF from your computer.</p>
-          <span class="file-type">
-            <span class="dot"></span>
-            PDF documents only
-          </span>
-        } @else {
-          <div class="selected-file">
-            <div class="file-glyph">PDF</div>
-            <div class="file-meta">
-              <span class="file-label">Selected document</span>
-              <h2>{{ selectedFile.name }}</h2>
-              <p>{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</p>
-            </div>
-            <span class="change-file">Choose another</span>
-          </div>
-        }
-      </div>
-
-      @if (errorMessage) {
-        <div class="message error-message">
-          <span class="message-icon">!</span>
-          {{ errorMessage }}
-        </div>
-      }
-
-      <div class="upload-actions">
-        <button
-          type="button"
-          class="upload-button"
-          [disabled]="!selectedFile || isUploading"
-          (click)="uploadDocument()"
-        >
-          @if (isUploading) {
-            <span class="spinner"></span>
-=======
     <h1>Add Financial Document</h1>
     <p>Upload a company's annual or interim report and the key figures are extracted and stored by period.</p>
   </header>
@@ -148,55 +79,12 @@
             Processing… you can leave this page, we'll notify you
           } @else if (isUploading) {
             <span class="spinner" aria-hidden="true"></span>
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             Analysing document…
           } @else {
             Analyse document
           }
         </button>
       </div>
-<<<<<<< HEAD
-    } @else {
-      <div class="upload-success">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M20 6L9 17L4 12"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-
-        <span class="success-label">Document processed</span>
-        <h2>{{ uploadedFileName }}</h2>
-        <p>{{ successMessage }}</p>
-        @if (conflictMessage) {
-          <p class="conflict-message">{{ conflictMessage }}</p>
-        }
-        <p class="success-note">
-          This report is now available in your dashboard.
-        </p>
-
-        <div class="success-actions">
-          <a class="dashboard-button" routerLink="/dashboard">
-            View in dashboard
-          </a>
-          <button
-            type="button"
-            class="upload-another-button"
-            (click)="resetUpload()"
-          >
-            Upload another document
-          </button>
-        </div>
-      </div>
-    }
-  </div>
-
-=======
     }
   } @else {
     <div class="upload-success">
@@ -217,5 +105,4 @@
       </div>
     </div>
   }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 </section>

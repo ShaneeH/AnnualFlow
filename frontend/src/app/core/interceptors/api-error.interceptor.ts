@@ -6,12 +6,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-<<<<<<< HEAD
-    readonly requestId: string | null
-=======
     readonly requestId: string | null,
     readonly code: string | null = null
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   ) {
     super(message);
     this.name = 'ApiError';
@@ -47,23 +43,13 @@ export const apiErrorInterceptor: HttpInterceptorFn = (req, next) =>
         return throwError(() => error);
       }
 
-<<<<<<< HEAD
-      const body = error.error as { requestId?: unknown } | null;
-=======
       const body = error.error as { requestId?: unknown; code?: unknown } | null;
       const code = body && typeof body.code === 'string' ? body.code : null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
       const requestId =
         (body && typeof body.requestId === 'string' ? body.requestId : null) ??
         error.headers?.get('X-Request-Id') ??
         null;
 
-<<<<<<< HEAD
-      return throwError(() => new ApiError(messageFor(error), error.status, requestId));
-    })
-  );
-
-=======
       return throwError(() => new ApiError(messageFor(error), error.status, requestId, code));
     })
   );
@@ -80,7 +66,6 @@ export function errorCode(error: unknown): string | null {
   return null;
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 /** Extracts a displayable message from any error thrown by an API call. */
 export function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) {

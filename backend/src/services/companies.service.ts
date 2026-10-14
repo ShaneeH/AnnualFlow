@@ -1,11 +1,5 @@
 import { NotFoundError } from "../utils/errors";
 import { db } from "../database/db";
-<<<<<<< HEAD
-import { calculateFinancialMetrics } from "./financial-metrics.service";
-import { compareFinancialPeriods } from "./comparison.service";
-
-export async function getCompanies() {
-=======
 import { calculateFinancialMetrics, calculateMargins } from "./financial-metrics.service";
 import { compareFinancialPeriods } from "./comparison.service";
 
@@ -33,18 +27,10 @@ export async function getCompanyAccess(
 }
 
 export async function getCompanies(viewerId: number | null) {
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     const result = await db.query(
         `
         SELECT
-<<<<<<< HEAD
-            company_id AS "companyId",
-            company_name AS "companyName"
-        FROM companies
-        ORDER BY company_name;
-        `
-=======
             c.company_id AS "companyId",
             c.company_name AS "companyName",
             -- Example dataset flag. The DB column keeps its original name
@@ -57,7 +43,6 @@ export async function getCompanies(viewerId: number | null) {
         ORDER BY c.company_name;
         `,
         [viewerId]
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     return result.rows;
@@ -65,28 +50,13 @@ export async function getCompanies(viewerId: number | null) {
 }
 
 export async function getCompanyPeriods(
-<<<<<<< HEAD
-    companyId: number
-=======
     companyId: number,
     viewerId: number | null
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ) {
 
     const result = await db.query(
         `
         SELECT
-<<<<<<< HEAD
-            period_id AS "periodId",
-            period,
-            period_label AS "periodLabel",
-            period_end AS "periodEnd"
-        FROM financial_periods
-        WHERE company_id = $1
-        ORDER BY period_end DESC NULLS LAST, period;
-        `,
-        [companyId]
-=======
             fp.period_id AS "periodId",
             fp.period,
             fp.period_label AS "periodLabel",
@@ -98,7 +68,6 @@ export async function getCompanyPeriods(
         ORDER BY fp.period_end DESC NULLS LAST, fp.period;
         `,
         [companyId, viewerId]
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     );
 
     // An empty list means the company is unknown or has no periods;
@@ -110,10 +79,7 @@ export async function getCompanyPeriods(
 export async function getFinancialPeriod(
     companyId: number,
     period: string,
-<<<<<<< HEAD
-=======
     viewerId: number | null,
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     compareTo?: string
 ) {
 
@@ -136,9 +102,6 @@ export async function getFinancialPeriod(
             fp.cash,
             fp.debt,
             fp.customers,
-<<<<<<< HEAD
-            fp.net_assets AS "netAssets"
-=======
             fp.net_assets AS "netAssets",
             fp.operating_cash_flow AS "operatingCashFlow",
             fp.total_assets AS "totalAssets",
@@ -151,7 +114,6 @@ export async function getFinancialPeriod(
                 FROM document_periods dp
                 WHERE dp.period_id = fp.period_id
             ) AS "sourceDocumentCount"
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         FROM companies c
 
@@ -162,22 +124,15 @@ export async function getFinancialPeriod(
             c.company_id = $1
         AND
             fp.period = $2
-<<<<<<< HEAD
-=======
         AND
             ${visibleTo("c", "$3")}
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         LIMIT 1;
         `,
         [
             companyId,
-<<<<<<< HEAD
-            period
-=======
             period,
             viewerId
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         ]
     );
 
@@ -217,16 +172,6 @@ export async function getFinancialPeriod(
             cash,
             debt,
             customers,
-<<<<<<< HEAD
-            net_assets AS "netAssets"
-
-        FROM financial_periods
-
-        WHERE
-            company_id = $1
-        AND
-            period = $2
-=======
             net_assets AS "netAssets",
             operating_cash_flow AS "operatingCashFlow",
             total_assets AS "totalAssets",
@@ -243,18 +188,13 @@ export async function getFinancialPeriod(
             fp.period = $2
         AND
             ${visibleTo("c", "$3")}
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         LIMIT 1;
         `,
         [
             companyId,
-<<<<<<< HEAD
-            compareTo
-=======
             compareTo,
             viewerId
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         ]
     );
 
@@ -286,12 +226,8 @@ export async function getFinancialPeriod(
 }
 
 export async function getCompanyHistory(
-<<<<<<< HEAD
-    companyId: number
-=======
     companyId: number,
     viewerId: number | null
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ) {
 
     const result = await db.query(
@@ -310,20 +246,6 @@ export async function getCompanyHistory(
             cash,
             debt,
             customers,
-<<<<<<< HEAD
-            net_assets AS "netAssets"
-
-        FROM financial_periods
-
-        WHERE company_id = $1
-
-        ORDER BY period_end ASC NULLS LAST, period;
-        `,
-        [companyId]
-    );
-
-    return result.rows;
-=======
             net_assets AS "netAssets",
             operating_cash_flow AS "operatingCashFlow",
             total_assets AS "totalAssets",
@@ -347,6 +269,5 @@ export async function getCompanyHistory(
         ...row,
         ...calculateMargins(row)
     }));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 }

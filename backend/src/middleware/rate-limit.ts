@@ -46,8 +46,6 @@ export const exportLimiter = rateLimit({
         error: "Too many export requests. Please try again later."
     }
 });
-<<<<<<< HEAD
-=======
 
 // AI insight generation calls the model, so it gets its own strict allowance.
 // Only POST (generation) uses this; reading a cached insight does not.
@@ -73,4 +71,3 @@ export const authLimiter = rateLimit({
         error: "Too many sign-in attempts. Please try again later."
     }
 });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

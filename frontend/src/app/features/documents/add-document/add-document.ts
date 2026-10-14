@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import { Component, inject, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
-
-import { errorMessage } from '../../../core/interceptors/api-error.interceptor';
-import { UploadReportResponse } from '../../../core/models/upload-report.model';
-import { CompanyService } from '../../../core/services/company.service';
-=======
 import { Component, DestroyRef, inject, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -16,7 +8,6 @@ import { UploadReportResponse } from '../../../core/models/upload-report.model';
 import { UploadJobsService } from '../../../core/services/upload-jobs.service';
 import { CompanyService } from '../../../core/services/company.service';
 import { MascotComponent } from '../../../shared/components/mascot/mascot';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 // Matches the backend default MAX_PDF_SIZE_MB.
 const MAX_PDF_SIZE_MB = 20;
@@ -25,54 +16,36 @@ const MAX_PDF_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 @Component({
   selector: 'app-add-document',
   standalone: true,
-<<<<<<< HEAD
-  imports: [RouterLink],
-=======
   imports: [RouterLink, MascotComponent],
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   templateUrl: './add-document.html',
   styleUrl: './add-document.scss'
 })
 export class AddDocument {
   private readonly companyService = inject(CompanyService);
-<<<<<<< HEAD
-
-  readonly documentAdded = output<void>();
-=======
   private readonly uploadJobs = inject(UploadJobsService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly documentAdded = output<void>();
   readonly maxSizeMb = MAX_PDF_SIZE_MB;
   isDragging = false;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   selectedFile: File | null = null;
   uploadedFileName: string | null = null;
   isUploading = false;
-<<<<<<< HEAD
-=======
   // True while a queued background job is being analysed.
   isProcessing = false;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   successMessage: string | null = null;
   errorMessage: string | null = null;
   conflictMessage: string | null = null;
-<<<<<<< HEAD
-=======
   // Set when the backend refused the file because it is not a financial report.
   rejectionMessage: string | null = null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
     if (!file) return;
-<<<<<<< HEAD
-
-=======
     if (!this.acceptFile(file)) input.value = '';
   }
 
@@ -113,7 +86,6 @@ export class AddDocument {
 
   /** Shared checks for the file picker and drag-and-drop. Returns false if the file was refused. */
   private acceptFile(file: File): boolean {
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     // Some browsers report an empty MIME type for PDFs, so accept either
     // a PDF MIME type or a .pdf extension, and require the extension.
     const hasPdfExtension = file.name.toLowerCase().endsWith('.pdf');
@@ -122,36 +94,21 @@ export class AddDocument {
     if (!hasPdfExtension || !hasPdfType) {
       this.errorMessage = 'Please select a PDF document.';
       this.selectedFile = null;
-<<<<<<< HEAD
-      input.value = '';
-      return;
-=======
       return false;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
 
     if (file.size > MAX_PDF_BYTES) {
       this.errorMessage = `The PDF is larger than the ${MAX_PDF_SIZE_MB} MB limit.`;
       this.selectedFile = null;
-<<<<<<< HEAD
-      input.value = '';
-      return;
-=======
       return false;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
 
     this.selectedFile = file;
     this.uploadedFileName = null;
-<<<<<<< HEAD
-    this.errorMessage = null;
-    this.successMessage = null;
-=======
     this.rejectionMessage = null;
     this.errorMessage = null;
     this.successMessage = null;
     return true;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   }
 
   uploadDocument(): void {
@@ -164,26 +121,6 @@ export class AddDocument {
     this.errorMessage = null;
     this.successMessage = null;
     this.conflictMessage = null;
-<<<<<<< HEAD
-
-    this.companyService.addDocument(this.selectedFile).subscribe({
-      next: (response: UploadReportResponse) => {
-        this.uploadedFileName = this.selectedFile?.name ?? null;
-        this.successMessage = 'Document analysed and added successfully.';
-
-        const conflicts = response.conflicts ?? [];
-        if (conflicts.length) {
-          const fields = conflicts.map(c => `${c.period} ${c.field}`).join(', ');
-          this.conflictMessage =
-            `This upload updated figures that were already stored: ${fields}.`;
-        }
-        this.selectedFile = null;
-        this.isUploading = false;
-        this.documentAdded.emit();
-      },
-
-      error: (error: unknown) => {
-=======
     this.rejectionMessage = null;
 
     this.companyService.addDocument(this.selectedFile).subscribe({
@@ -207,7 +144,6 @@ export class AddDocument {
           return;
         }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         this.errorMessage = errorMessage(
           error,
           'Something went wrong while analysing the document.'
@@ -218,8 +154,6 @@ export class AddDocument {
     });
   }
 
-<<<<<<< HEAD
-=======
   private showSuccess(response: Pick<UploadReportResponse, 'conflicts'>): void {
     this.uploadedFileName = this.selectedFile?.name ?? this.uploadedFileName;
     this.successMessage = 'Document analysed and added successfully.';
@@ -267,16 +201,12 @@ export class AddDocument {
     }
   }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   resetUpload(): void {
     this.selectedFile = null;
     this.uploadedFileName = null;
     this.successMessage = null;
     this.errorMessage = null;
     this.conflictMessage = null;
-<<<<<<< HEAD
-=======
     this.rejectionMessage = null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   }
 }

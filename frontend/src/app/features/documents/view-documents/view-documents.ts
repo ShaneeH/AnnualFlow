@@ -3,9 +3,6 @@ import { Component, inject, OnInit } from '@angular/core';
 
 import { errorMessage } from '../../../core/interceptors/api-error.interceptor';
 import { FinancialDocument } from '../../../core/models/document.model';
-<<<<<<< HEAD
-import { CompanyService } from '../../../core/services/company.service';
-=======
 import { CompanyReportService } from '../../../core/services/company-report.service';
 import { FindingsExportService } from '../../../core/services/findings-export.service';
 import { CompanyService } from '../../../core/services/company.service';
@@ -44,7 +41,6 @@ export function companyHue(name: string): number {
 
 /** How many period tags a row shows before collapsing into "+N more". */
 export const VISIBLE_PERIOD_TAGS = 3;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 @Component({
   selector: 'app-view-documents',
@@ -55,8 +51,6 @@ export const VISIBLE_PERIOD_TAGS = 3;
 })
 export class ViewDocuments implements OnInit {
   private readonly companyService = inject(CompanyService);
-<<<<<<< HEAD
-=======
   private readonly companyReports = inject(CompanyReportService);
   private readonly findingsExport = inject(FindingsExportService);
   exportingJsonCompanyId: number | null = null;
@@ -64,7 +58,6 @@ export class ViewDocuments implements OnInit {
   readonly visiblePeriodTags = VISIBLE_PERIOD_TAGS;
   expandedDocumentIds = new Set<number>();
   generatingCompanyId: number | null = null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   documents: FinancialDocument[] = [];
   isLoading = false;
@@ -83,14 +76,10 @@ export class ViewDocuments implements OnInit {
 
     this.companyService.getDocuments().subscribe({
       next: documents => {
-<<<<<<< HEAD
-        this.documents = documents;
-=======
         this.documents = documents.map(document => ({
           ...document,
           periods: sortPeriodsForDisplay(document.periods)
         }));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         this.isLoading = false;
       },
       error: (error: unknown) => {
@@ -150,8 +139,6 @@ export class ViewDocuments implements OnInit {
       return null;
     }
   }
-<<<<<<< HEAD
-=======
 
   /** Period tags to show: the first few unless the row is expanded. */
   visiblePeriods(document: FinancialDocument): DocumentPeriod[] {
@@ -231,5 +218,4 @@ export class ViewDocuments implements OnInit {
       this.exportingJsonCompanyId = null;
     }
   }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }

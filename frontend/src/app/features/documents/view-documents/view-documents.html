@@ -1,15 +1,4 @@
 <section class="view-documents">
-<<<<<<< HEAD
-  <header class="section-header">
-    <div>
-      <span class="section-eyebrow">Document Library</span>
-      <h2>Uploaded Reports</h2>
-      <p>Review the reports used to create your financial dashboard.</p>
-    </div>
-
-    <div class="header-actions">
-      @if (!isLoading) {
-=======
   <header class="page-header">
     <div class="page-title">
       <h2>My Reports</h2>
@@ -18,22 +7,10 @@
 
     <div class="header-actions">
       @if (!isLoading || documents.length > 0) {
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         <span class="document-count">
           {{ documents.length }} {{ documents.length === 1 ? 'report' : 'reports' }}
         </span>
       }
-<<<<<<< HEAD
-
-      <button
-        type="button"
-        class="refresh-button"
-        [disabled]="isLoading"
-        (click)="loadDocuments()"
-        aria-label="Refresh documents"
-      >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-=======
       <button
         type="button"
         class="ghost-button"
@@ -42,7 +19,6 @@
         aria-label="Refresh reports"
       >
         <svg class="icon" [class.spinning]="isLoading" viewBox="0 0 24 24" fill="none" aria-hidden="true">
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
           <path d="M20 6v5h-5M4 18v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M18.2 9A7 7 0 006.4 6.4L4 9m2 6a7 7 0 0011.6 2.6L20 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -52,139 +28,6 @@
   </header>
 
   @if (successMessage) {
-<<<<<<< HEAD
-    <div class="status-message success-message" role="status">
-      <span class="status-icon">✓</span>
-      {{ successMessage }}
-    </div>
-  }
-
-  @if (errorMessage && documents.length > 0) {
-    <div class="status-message error-message" role="alert">
-      <span class="status-icon">!</span>
-      {{ errorMessage }}
-    </div>
-  }
-
-  @if (isLoading && documents.length === 0) {
-    <div class="loading-state" aria-live="polite">
-      <span class="spinner"></span>
-      <span>Loading documents…</span>
-    </div>
-  } @else if (errorMessage && documents.length === 0) {
-    <div class="empty-state error-state">
-      <div class="empty-icon">!</div>
-      <h3>Could not load the documents</h3>
-      <p>{{ errorMessage }}</p>
-      <button type="button" (click)="loadDocuments()">Try again</button>
-    </div>
-  } @else if (documents.length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">PDF</div>
-      <h3>No reports uploaded yet</h3>
-      <p>Your analysed financial reports will appear here.</p>
-    </div>
-  } @else {
-    <div class="table-card" [class.is-refreshing]="isLoading">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Report</th>
-              <th>Company</th>
-              <th>Reporting periods</th>
-              <th>Type</th>
-              <th>Report date</th>
-              <th>Uploaded</th>
-              <th><span class="visually-hidden">Actions</span></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            @for (document of documents; track document.documentId) {
-              <tr>
-                <td>
-                  <div class="report-cell">
-                    <span class="pdf-glyph">PDF</span>
-                    <div>
-                      <strong>{{ document.reportName }}</strong>
-                      @if (getSourceUrl(document.source); as sourceUrl) {
-                        <a [href]="sourceUrl" target="_blank" rel="noopener noreferrer">
-                          View source
-                        </a>
-                      }
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="company-name">{{ document.companyName }}</span>
-                </td>
-                <td>
-                  <div class="period-list">
-                    @for (period of document.periods; track period.periodId) {
-                      <span class="period-pill" [title]="period.periodLabel">
-                        {{ period.period }}
-                      </span>
-                    } @empty {
-                      <span class="muted-value">No periods</span>
-                    }
-                  </div>
-                </td>
-                <td>
-                  <span class="type-value">{{ document.reportType }}</span>
-                </td>
-                <td>
-                  @if (document.reportDate) {
-                    <span class="date-value">{{ document.reportDate | date:'d MMM y':'UTC' }}</span>
-                  } @else {
-                    <span class="muted-value">Not provided</span>
-                  }
-                </td>
-                <td>
-                  <span class="date-value">{{ document.uploadedAt | date:'d MMM y, HH:mm' }}</span>
-                </td>
-                <td class="action-cell">
-                  @if (pendingDeleteId === document.documentId) {
-                    <div class="delete-confirmation">
-                      <span>Delete?</span>
-                      <button
-                        type="button"
-                        class="confirm-button"
-                        [disabled]="deletingDocumentId === document.documentId"
-                        (click)="confirmDelete(document)"
-                      >
-                        {{ deletingDocumentId === document.documentId ? 'Deleting…' : 'Yes' }}
-                      </button>
-                      <button
-                        type="button"
-                        class="cancel-button"
-                        [disabled]="deletingDocumentId === document.documentId"
-                        (click)="cancelDelete()"
-                      >
-                        No
-                      </button>
-                    </div>
-                  } @else {
-                    <button
-                      type="button"
-                      class="delete-button"
-                      (click)="requestDelete(document.documentId)"
-                      [attr.aria-label]="'Delete ' + document.reportName"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M4 7h16M9 7V4h6v3m3 0l-1 13H7L6 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M10 11v5m4-5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                      </svg>
-                      Delete
-                    </button>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-=======
     <div class="status-message success" role="status">{{ successMessage }}</div>
   }
   @if (errorMessage && documents.length > 0) {
@@ -352,7 +195,6 @@
           }
         </tbody>
       </table>
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     </div>
   }
 </section>

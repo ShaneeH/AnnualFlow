@@ -7,10 +7,7 @@
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   border-bottom: 2px solid #1a1a1a;
-<<<<<<< HEAD
-=======
   background: var(--background);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -30,8 +27,6 @@
   color: #ffffff;
   cursor: pointer;
   letter-spacing: -0.02em;
-<<<<<<< HEAD
-=======
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -41,37 +36,25 @@
 
 .navbar-links a.active {
   color: #ffffff;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 /* Center links */
 .navbar-links {
   display: flex;
   align-items: center;
-<<<<<<< HEAD
-  gap: 2rem;
-=======
   gap: 1.25rem;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 .navbar-links a {
   color: #a1a1aa;
   text-decoration: none;
-<<<<<<< HEAD
-  font-size: 0.95rem;
-  font-weight: 500;
-=======
   font-size: 1.0625rem;
   font-weight: 700;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   padding: 0.45rem 0.85rem;          
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
-<<<<<<< HEAD
-=======
 /* Signed-in avatar: the circle is the link; the label only shows in the mobile menu. */
 .navbar-links a.navbar-avatar {
   display: inline-flex;
@@ -90,16 +73,12 @@
   display: none;
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 .navbar-links a:hover {
   color: #ffffff;
   background-color: #1f1f1f;         
 }
 
 
-<<<<<<< HEAD
-/* Optional: make it responsive */
-=======
 /* Hamburger button: only shown on small screens. */
 .menu-toggle {
   display: none;
@@ -140,18 +119,11 @@
 .menu-icon.open span:nth-child(2) { opacity: 0; }
 .menu-icon.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 @media (max-width: 768px) {
   .navbar {
     padding: 0 1rem;
   }
 
-<<<<<<< HEAD
-  .navbar-links {
-    display: none;
-  }
-}
-=======
   .menu-toggle {
     display: inline-flex;
   }
@@ -195,4 +167,3 @@
     transition: none;
   }
 }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

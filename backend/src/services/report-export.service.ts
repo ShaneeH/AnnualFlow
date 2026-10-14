@@ -176,11 +176,7 @@ class ReportPdf {
     }
 
     private addPeriod(period: DocumentPeriodRecord): void {
-<<<<<<< HEAD
-        this.ensureSpace(226);
-=======
         this.ensureSpace(300);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         this.rect(MARGIN, this.y, PAGE_WIDTH - MARGIN * 2, 34, "0.925 0.957 0.976");
         this.text(period.periodLabel || period.period, MARGIN + 12, this.y + 21, 12, true, "0.04 0.32 0.53");
@@ -196,15 +192,11 @@ class ReportPdf {
             ["Cash", period.cash, true],
             ["Debt", period.debt, true],
             ["Customers", period.customers, false],
-<<<<<<< HEAD
-            ["Net assets", period.netAssets, true]
-=======
             ["Net assets", period.netAssets, true],
             ["Operating cash flow", period.operatingCashFlow, true],
             ["Total assets", period.totalAssets, true],
             ["Total liabilities", period.totalLiabilities, true],
             ["Earnings per share", period.eps, true]
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         ];
 
         metrics.forEach(([label, value, monetary], index) => {
@@ -382,15 +374,11 @@ export function createReportCsv(
         "Cash",
         "Debt",
         "Customers",
-<<<<<<< HEAD
-        "Net assets"
-=======
         "Net assets",
         "Operating cash flow",
         "Total assets",
         "Total liabilities",
         "EPS"
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     ];
 
     const rows = document.periods.map(period => [
@@ -409,15 +397,11 @@ export function createReportCsv(
         period.cash,
         period.debt,
         period.customers,
-<<<<<<< HEAD
-        period.netAssets
-=======
         period.netAssets,
         period.operatingCashFlow,
         period.totalAssets,
         period.totalLiabilities,
         period.eps
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     ]);
 
     return [headers, ...rows]
@@ -451,15 +435,11 @@ export function createReportJson(
                 cash: toNumber(period.cash),
                 debt: toNumber(period.debt),
                 customers: toNumber(period.customers),
-<<<<<<< HEAD
-                netAssets: toNumber(period.netAssets)
-=======
                 netAssets: toNumber(period.netAssets),
                 operatingCashFlow: toNumber(period.operatingCashFlow),
                 totalAssets: toNumber(period.totalAssets),
                 totalLiabilities: toNumber(period.totalLiabilities),
                 eps: toNumber(period.eps)
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             }))
         }
     }, null, 2) + "\n";

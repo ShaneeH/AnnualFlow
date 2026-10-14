@@ -25,9 +25,6 @@ describe('Navbar', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-<<<<<<< HEAD
-});
-=======
 
   it('should show "Annualflow" as a link to the home page', () => {
     const logo: HTMLAnchorElement | null =
@@ -58,4 +55,3 @@ describe('Navbar', () => {
     expect(links.classList).not.toContain('open');
   });
 });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

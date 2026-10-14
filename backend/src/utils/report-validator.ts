@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { ReportValidationError } from "./errors";
-=======
 import { NotFinancialReportError, ReportValidationError } from "./errors";
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 export const REPORT_TYPES = [
     "Annual Report",
@@ -19,8 +15,6 @@ export const REPORT_TYPES = [
 
 export type ReportType = typeof REPORT_TYPES[number];
 
-<<<<<<< HEAD
-=======
 /** What the AI thinks the uploaded document is. */
 export const DOCUMENT_TYPES = [
     "Financial Report",
@@ -55,7 +49,6 @@ export interface DocumentClassification {
     reason: string;
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 export interface FinancialPeriod {
     period: string;
     periodEnd: string | null;
@@ -69,11 +62,6 @@ export interface FinancialPeriod {
     debt: number | null;
     customers: number | null;
     netAssets: number | null;
-<<<<<<< HEAD
-}
-
-export interface FinancialReport {
-=======
     operatingCashFlow: number | null;
     totalAssets: number | null;
     totalLiabilities: number | null;
@@ -82,7 +70,6 @@ export interface FinancialReport {
 
 export interface FinancialReport {
     classification: DocumentClassification;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     company: string;
     reportName: string;
     reportType: ReportType;
@@ -102,15 +89,11 @@ const METRIC_KEYS = [
     "cash",
     "debt",
     "customers",
-<<<<<<< HEAD
-    "netAssets"
-=======
     "netAssets",
     "operatingCashFlow",
     "totalAssets",
     "totalLiabilities",
     "eps"
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 ] as const;
 
 type MetricKey = typeof METRIC_KEYS[number];
@@ -212,15 +195,11 @@ function validatePeriod(value: unknown, index: number): FinancialPeriod {
         cash: null,
         debt: null,
         customers: null,
-<<<<<<< HEAD
-        netAssets: null
-=======
         netAssets: null,
         operatingCashFlow: null,
         totalAssets: null,
         totalLiabilities: null,
         eps: null
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     };
 
     for (const key of METRIC_KEYS) {
@@ -230,8 +209,6 @@ function validatePeriod(value: unknown, index: number): FinancialPeriod {
     return result;
 }
 
-<<<<<<< HEAD
-=======
 function validateClassification(value: unknown): DocumentClassification {
     if (!isRecord(value)) {
         throw new NotFinancialReportError(
@@ -351,7 +328,6 @@ export function assertFinancialContent(periods: FinancialPeriod[]): void {
     }
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 export function parseAndValidateReport(aiResponse: string): FinancialReport {
     let parsed: unknown;
 
@@ -365,14 +341,11 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
         throw new ReportValidationError("The analysis service returned an invalid report.");
     }
 
-<<<<<<< HEAD
-=======
     // Classification is checked first: a non-financial document (e.g. a CV)
     // must be rejected before anything else is interpreted or stored.
     const classification = validateClassification(parsed.classification);
     assertIsFinancialDocument(classification);
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     const reportType = requiredString(parsed.reportType, "report type", 80);
     if (!REPORT_TYPES.includes(reportType as ReportType)) {
         throw new ReportValidationError(`The extracted report type '${reportType}' is unsupported.`);
@@ -384,11 +357,7 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
     }
 
     if (!Array.isArray(parsed.periods) || parsed.periods.length === 0) {
-<<<<<<< HEAD
-        throw new ReportValidationError("No financial reporting periods were found in the uploaded PDF.");
-=======
         throw new NotFinancialReportError("No financial reporting periods were found in the uploaded PDF.");
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
     if (parsed.periods.length > 40) {
         throw new ReportValidationError("The document contains too many reporting periods.");
@@ -400,14 +369,10 @@ export function parseAndValidateReport(aiResponse: string): FinancialReport {
         throw new ReportValidationError("The analysis returned duplicate reporting periods.");
     }
 
-<<<<<<< HEAD
-    return {
-=======
     assertFinancialContent(periods);
 
     return {
         classification,
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         company: requiredString(parsed.company, "company", 255),
         reportName: requiredString(parsed.reportName, "report name", 300),
         reportType: reportType as ReportType,

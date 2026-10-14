@@ -5,27 +5,9 @@
 
   <h2 class="kpi-value">
     @if (value() !== null) {
-<<<<<<< HEAD
-      @switch (format()) {
-        @case ('currency') {
-          {{ value() | currencyFormat }}
-        }
-
-        @case ('number') {
-          {{ value() | number }}
-        }
-
-        @case ('percent') {
-          {{ value() | number: '1.1-2' }}%
-        }
-      }
-    } @else {
-      <span class="kpi-empty"> — </span>
-=======
       {{ displayValue() }}
     } @else {
       <span class="kpi-empty"> {{ empty }} </span>
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
   </h2>
 
@@ -33,11 +15,7 @@
     <span class="kpi-change" [class.positive]="change()! >= 0" [class.negative]="change()! < 0">
       {{ change()! >= 0 ? '▲' : '▼' }}
 
-<<<<<<< HEAD
-      {{ change() | number: '1.1-1' }}%
-=======
       {{ displayChange() }}
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     </span>
   }
 </div>

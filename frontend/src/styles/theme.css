@@ -153,8 +153,6 @@ button:hover {
     letter-spacing: -0.01em;
 }
 
-<<<<<<< HEAD
-=======
 
 /* Primary "create report" call to action (dashboard + My Reports). */
 .create-report-button {
@@ -255,4 +253,3 @@ button:hover {
   height: 22px;
 }
 .report-header-actions .board-report-button { text-align: left; white-space: nowrap; }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

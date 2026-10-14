@@ -20,17 +20,6 @@ describe('CurrencyFormatPipe', () => {
   });
 
   it('should format thousands', () => {
-<<<<<<< HEAD
-    expect(pipe.transform(25_000)).toBe('€25.0K');
-  });
-
-  it('should format millions', () => {
-    expect(pipe.transform(2_500_000)).toBe('€2.50M');
-  });
-
-  it('should format billions', () => {
-    expect(pipe.transform(1_500_000_000)).toBe('€1.50B');
-=======
     expect(pipe.transform(25_000)).toBe('€25.0k');
   });
 
@@ -40,6 +29,5 @@ describe('CurrencyFormatPipe', () => {
 
   it('should format billions', () => {
     expect(pipe.transform(1_500_000_000)).toBe('€1.5bn');
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   });
 });

@@ -10,13 +10,6 @@ export interface FinancialMetrics {
     revenuePerCustomer: number | null;
     roce: number | null;
     debtServiceCoverageRatio: number | null;
-<<<<<<< HEAD
-}
-
-export function calculateFinancialMetrics(
-    period: FinancialPeriod
-): FinancialMetrics {
-=======
     operatingCashFlowMargin: number | null;
     cashConversion: number | null;
     returnOnEquity: number | null;
@@ -51,7 +44,6 @@ export function calculateFinancialMetrics(
     const positiveEquity =
         period.netAssets !== null && period.netAssets > 0 ? period.netAssets : null;
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     return {
         grossMargin: calculatePercentage(period.grossProfit, period.revenue),
         operatingMargin: calculatePercentage(period.operatingProfit, period.revenue),
@@ -65,12 +57,6 @@ export function calculateFinancialMetrics(
 
         // These need more financial data before they can be calculated
         roce: null,
-<<<<<<< HEAD
-        debtServiceCoverageRatio: null
-    };
-}
-
-=======
         debtServiceCoverageRatio: null,
 
         // All derived deterministically here from extracted figures; the AI is
@@ -99,7 +85,6 @@ export function calculateMargins(period: MetricInput): PeriodMargins {
     return { grossMargin, operatingMargin, ebitdaMargin, netMargin };
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 function calculatePercentage(
     numerator: number | null,
     denominator: number | null

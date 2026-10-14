@@ -10,13 +10,10 @@ export interface FinancialComparison {
     debtGrowth: number | null;
     customerGrowth: number | null;
     netAssetGrowth: number | null;
-<<<<<<< HEAD
-=======
     operatingCashFlowGrowth: number | null;
     totalAssetsGrowth: number | null;
     totalLiabilitiesGrowth: number | null;
     epsGrowth: number | null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 export function compareFinancialPeriods( current: FinancialPeriod, previous: FinancialPeriod): FinancialComparison {
@@ -33,9 +30,6 @@ export function compareFinancialPeriods( current: FinancialPeriod, previous: Fin
         cashGrowth: calculateGrowth(current.cash, previous.cash),
         debtGrowth: calculateGrowth(current.debt, previous.debt),
         customerGrowth: calculateGrowth(current.customers, previous.customers),
-<<<<<<< HEAD
-        netAssetGrowth: calculateGrowth(current.netAssets, previous.netAssets)
-=======
         netAssetGrowth: calculateGrowth(current.netAssets, previous.netAssets),
         operatingCashFlowGrowth: calculateGrowth(
             current.operatingCashFlow,
@@ -47,7 +41,6 @@ export function compareFinancialPeriods( current: FinancialPeriod, previous: Fin
             previous.totalLiabilities
         ),
         epsGrowth: calculateGrowth(current.eps, previous.eps)
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     };
 }
 

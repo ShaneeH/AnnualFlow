@@ -2,10 +2,7 @@ import { Component, Input } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, ChartConfiguration, ChartOptions, registerables } from 'chart.js';
 import { HistoryPeriod } from '../../../core/models/history-period.model';
-<<<<<<< HEAD
-=======
 import { formatCount } from '../../utils/number-format';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 // Register all Chart.js components so bar charts work out of the box.
 Chart.register(...registerables);
@@ -28,13 +25,8 @@ export class CustomerChartComponent {
 
       datasets: [{
         label: 'Customers',
-<<<<<<< HEAD
-        // Convert each period's customer count to a number (fallback to 0).
-        data: history.map(period => Number(period.customers ?? 0)),
-=======
         // Missing periods are left as gaps rather than shown as zero.
         data: history.map(period => period.customers ?? null),
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         borderWidth: 1,
         borderRadius: 6,          // Rounded bar corners
         borderSkipped: false,     
@@ -63,14 +55,7 @@ export class CustomerChartComponent {
       tooltip: {
         callbacks: {
           // Format the tooltip value as a readable customer count.
-<<<<<<< HEAD
-          label: context => {
-            const value = context.parsed.y ?? 0;
-            return `${value.toLocaleString()} customers`;
-          }
-=======
           label: context => `${formatCount(context.parsed.y)} customers`
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         }
       }
     },
@@ -91,11 +76,7 @@ export class CustomerChartComponent {
         ticks: {
           color: '#a1a1aa',
           // Format large numbers with thousand separators.
-<<<<<<< HEAD
-          callback: value => Number(value).toLocaleString()
-=======
           callback: value => formatCount(Number(value))
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         },
 
         grid: {

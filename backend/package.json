@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "name": "backend",
-=======
   "name": "annualflow-backend",
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   "version": "2.0.0",
   "description": "Secure financial document processing and reporting API",
   "main": "index.js",
@@ -13,13 +9,6 @@
     "start": "node dist/server.js",
     "db:migrate": "npm run build && node dist/database/migrate.js",
     "test": "npm run build && node --require ./dist/test-setup.js --test dist/*.test.js dist/**/*.test.js",
-<<<<<<< HEAD
-    "check": "npm test"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-=======
     "check": "npm test",
     "db:seed:example": "npm run build && node dist/database/seed-example.js",
     "db:seed:demo": "npm run db:seed:example",
@@ -28,18 +17,14 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
-<<<<<<< HEAD
-=======
     "google-auth-library": "^11.2.0",
     "jsonwebtoken": "^9.0.3",
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     "multer": "^2.2.0",
     "openai": "^7.0.0",
     "pg": "^8.22.0"
@@ -47,20 +32,14 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-<<<<<<< HEAD
-=======
     "@types/jsonwebtoken": "^9.0.10",
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     "@types/multer": "^2.2.0",
     "@types/node": "^26.1.1",
     "@types/pg": "^8.20.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "5.9"
-<<<<<<< HEAD
-=======
   },
   "engines": {
     "node": ">=22"
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   }
 }

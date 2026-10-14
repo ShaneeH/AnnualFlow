@@ -9,10 +9,7 @@ import {
 } from 'chart.js';
 
 import { HistoryPeriod } from '../../../core/models/history-period.model';
-<<<<<<< HEAD
-=======
 import { formatMoney } from '../../utils/number-format';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 // Register all Chart.js components so line charts work out of the box.
 Chart.register(...registerables);
@@ -85,20 +82,7 @@ export class RevenueChartComponent {
 
         callbacks: {
           // Format revenue values as compact euro amounts.
-<<<<<<< HEAD
-          label: (context) => {
-            const value = context.parsed.y ?? 0;
-
-            return new Intl.NumberFormat('en-IE', {
-              style: 'currency',
-              currency: 'EUR',
-              notation: 'compact',
-              maximumFractionDigits: 2
-            }).format(value);
-          }
-=======
           label: context => `Revenue: ${formatMoney(context.parsed.y)}`
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         }
       }
     },
@@ -123,18 +107,7 @@ export class RevenueChartComponent {
           color: '#a1a1aa',
 
           // Keep the axis readable when revenue values get large.
-<<<<<<< HEAD
-          callback: (value) => {
-            return new Intl.NumberFormat('en-IE', {
-              style: 'currency',
-              currency: 'EUR',
-              notation: 'compact',
-              maximumFractionDigits: 1
-            }).format(Number(value));
-          }
-=======
           callback: value => formatMoney(Number(value), 0)
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         },
 
         grid: {

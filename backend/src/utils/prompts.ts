@@ -15,8 +15,6 @@ Security boundary:
 
 Return only valid JSON matching the schema below.
 
-<<<<<<< HEAD
-=======
 Step 1 - classify the document (mandatory, decide this BEFORE extracting anything):
 - Set classification.isFinancialReport to true ONLY if the document is a company's
   financial report or financial statements: an annual/interim/half-year/quarterly
@@ -35,7 +33,6 @@ Step 1 - classify the document (mandatory, decide this BEFORE extracting anythin
   "Other", reportDate null, currency null, source null and periods [] - do not
   extract any figures.
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 General rules:
 - Return exactly one JSON object.
 - Do not include markdown or explanations.
@@ -78,10 +75,7 @@ Unit scale rules:
   a new metric, it is correctly reading the one that is printed.
 - customers is a count, not a monetary value, and must never be scaled even if it
   appears in a table that declares a monetary scale.
-<<<<<<< HEAD
-=======
 - eps is a per-share amount and must never be scaled.
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 Document rules:
 
@@ -237,8 +231,6 @@ Metric rules:
 - customers is the reported customer count for that period.
 - netAssets is reported net assets or net liabilities.
 - Return net liabilities as negative values.
-<<<<<<< HEAD
-=======
 - operatingCashFlow is net cash generated from (or used in) operating activities,
   taken from the cash flow statement.
 - totalAssets is total assets from the balance sheet.
@@ -247,7 +239,6 @@ Metric rules:
 - eps is basic earnings per share as reported, in the report currency per share
   (e.g. 0.42). It is a per-share amount and must never be multiplied by a table's
   monetary scale. Prefer basic over diluted EPS.
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 - If a document reports a metric only as a percentage or ratio with no absolute
   currency or count figure available anywhere in the document, return null for that
   field. Do not back-calculate the absolute value from the percentage.
@@ -275,15 +266,12 @@ Consistency check:
 Return exactly this JSON:
 
 {
-<<<<<<< HEAD
-=======
   "classification": {
     "isFinancialReport": false,
     "documentType": null,
     "confidence": 0,
     "reason": ""
   },
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   "company": null,
   "reportName": null,
   "reportType": null,
@@ -303,15 +291,11 @@ Return exactly this JSON:
       "cash": null,
       "debt": null,
       "customers": null,
-<<<<<<< HEAD
-      "netAssets": null
-=======
       "netAssets": null,
       "operatingCashFlow": null,
       "totalAssets": null,
       "totalLiabilities": null,
       "eps": null
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     }
   ]
 }

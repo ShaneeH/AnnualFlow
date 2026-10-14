@@ -5,13 +5,9 @@ import { vi } from 'vitest';
 
 import { FinancialDocument } from '../../../core/models/document.model';
 import { CompanyService } from '../../../core/services/company.service';
-<<<<<<< HEAD
-import { ViewDocuments } from './view-documents';
-=======
 import { CompanyReportService } from '../../../core/services/company-report.service';
 import { FindingsExportService } from '../../../core/services/findings-export.service';
 import { companyHue, periodTagClass, reportTypeLabel, ViewDocuments } from './view-documents';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 describe('ViewDocuments', () => {
   let component: ViewDocuments;
@@ -21,10 +17,7 @@ describe('ViewDocuments', () => {
     documentId: 12,
     companyId: 1,
     companyName: 'Senus PLC',
-<<<<<<< HEAD
-=======
     isOwned: true,
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     reportName: 'Annual Report 2025',
     reportType: 'Annual Report',
     reportDate: '2025-12-31',
@@ -46,12 +39,9 @@ describe('ViewDocuments', () => {
     deleteDocument: vi.fn()
   };
 
-<<<<<<< HEAD
-=======
   const companyReports = { download: vi.fn() };
   const findingsExport = { download: vi.fn() };
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   beforeEach(async () => {
     vi.clearAllMocks();
     companyService.getDocuments.mockReturnValue(of([document]));
@@ -59,13 +49,9 @@ describe('ViewDocuments', () => {
     await TestBed.configureTestingModule({
       imports: [ViewDocuments],
       providers: [
-<<<<<<< HEAD
-        { provide: CompanyService, useValue: companyService }
-=======
         { provide: CompanyService, useValue: companyService },
         { provide: CompanyReportService, useValue: companyReports },
         { provide: FindingsExportService, useValue: findingsExport }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
       ]
     }).compileComponents();
 
@@ -112,8 +98,6 @@ describe('ViewDocuments', () => {
     expect(component.errorMessage).toBe('Failed to retrieve documents.');
     expect(component.isLoading).toBe(false);
   });
-<<<<<<< HEAD
-=======
 
   it('sorts periods (FY first) and collapses extras into "+N more"', () => {
     const many: FinancialDocument = {
@@ -176,5 +160,4 @@ describe('ViewDocuments', () => {
     expect(findingsExport.download).toHaveBeenCalledWith(1, 'Senus PLC', null);
     expect(component.exportingJsonCompanyId).toBeNull();
   });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 });

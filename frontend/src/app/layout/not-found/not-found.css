@@ -16,8 +16,6 @@
   border-radius: var(--radius-medium);
 }
 
-<<<<<<< HEAD
-=======
 .not-found-art {
   display: block;
   width: auto;
@@ -26,7 +24,6 @@
   margin: 0 auto 1.5rem;
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 .error-code {
   display: block;
   margin-bottom: 1rem;

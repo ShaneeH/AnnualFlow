@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
-=======
 import { Component, DestroyRef, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, Subject, catchError, finalize, forkJoin, switchMap, tap } from 'rxjs';
 
@@ -16,10 +12,6 @@ import { HistoryPeriod } from '../../core/models/history-period.model';
 import { CustomerChartComponent } from '../../shared/components/customer-chart/customer-chart';
 import { DropdownOption, DropdownSelectComponent } from '../../shared/components/dropdown-selector/dropdown-selector';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card';
-<<<<<<< HEAD
-import { RevenueChartComponent } from '../../shared/components/revenue-chart/revenue-chart';
-
-=======
 import { AiInsightComponent } from '../../shared/components/ai-insight/ai-insight';
 import { MarginsChartComponent } from '../../shared/components/margins-chart/margins-chart';
 import { hasSeries, isPresent } from '../../shared/utils/chart-data';
@@ -98,7 +90,6 @@ export function buildKpiCards(financialPeriod: FinancialPeriod | null): KpiCard[
   });
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 interface PeriodRequest {
   companyId: number;
   period: string;
@@ -108,9 +99,6 @@ interface PeriodRequest {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-<<<<<<< HEAD
-  imports: [DropdownSelectComponent, KpiCardComponent, RevenueChartComponent, CustomerChartComponent],
-=======
   imports: [
     RouterLink,
     DropdownSelectComponent,
@@ -121,21 +109,16 @@ interface PeriodRequest {
     CashFlowChartComponent,
     AiInsightComponent
   ],
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
   private readonly companyService = inject(CompanyService);
-<<<<<<< HEAD
-  private readonly destroyRef = inject(DestroyRef);
-=======
   private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly boardReports = inject(BoardReportService);
   private readonly companyReports = inject(CompanyReportService);
   private readonly findingsExport = inject(FindingsExportService);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
   // Selections flow through these subjects. switchMap cancels the previous
   // request, so a slow response for an old selection can never overwrite
@@ -151,10 +134,6 @@ export class Dashboard implements OnInit {
   // Full history is used by the dashboard charts.
   history: HistoryPeriod[] = [];
 
-<<<<<<< HEAD
-  // Current dashboard selections.
-  selectedCompany: DropdownOption<number> | null = null;
-=======
   // Charts show one kind of period at a time (Annual / Quarterly).
   chartHistory: HistoryPeriod[] = [];
   chartPeriodKinds: PeriodKind[] = [];
@@ -179,15 +158,10 @@ export class Dashboard implements OnInit {
   get isExampleCompany(): boolean {
     return !!this.selectedCompany && this.exampleCompanyIds.has(this.selectedCompany.value);
   }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   selectedPeriod: DropdownOption<string> | null = null;
   selectedComparePeriod: DropdownOption<string> | null = null;
 
   financialPeriod: FinancialPeriod | null = null;
-<<<<<<< HEAD
-  companyName = '';
-
-=======
   kpiCards: KpiCard[] = [];
   companyName = '';
 
@@ -196,7 +170,6 @@ export class Dashboard implements OnInit {
   showCustomerChart = false;
   showMarginsChart = false;
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   // View state.
   isLoadingCompanies = false;
   isLoadingCompany = false;
@@ -204,8 +177,6 @@ export class Dashboard implements OnInit {
   emptyData = false;
   errorMessage: string | null = null;
 
-<<<<<<< HEAD
-=======
   // Board report PDF export state.
   isGeneratingReport = false;
   isGeneratingCompanyReport = false;
@@ -275,7 +246,6 @@ export class Dashboard implements OnInit {
   // Saved selections waiting to be validated against freshly loaded data.
   private pendingRestore: DashboardState | null = null;
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   ngOnInit(): void {
     this.companyChanges
       .pipe(
@@ -299,8 +269,6 @@ export class Dashboard implements OnInit {
       )
       .subscribe();
 
-<<<<<<< HEAD
-=======
     const saved = loadDashboardState();
     this.preferredChartKind = saved.chartPeriodKind ?? null;
     this.pendingRestore = saved.companyId !== null ? saved : null;
@@ -313,7 +281,6 @@ export class Dashboard implements OnInit {
       this.restoreLatestPeriod = true;
     }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     this.loadCompanies();
   }
 
@@ -324,12 +291,6 @@ export class Dashboard implements OnInit {
     // Clear old dashboard data before loading the new company.
     this.selectedPeriod = null;
     this.selectedComparePeriod = null;
-<<<<<<< HEAD
-    this.financialPeriod = null;
-    this.periods = [];
-    this.comparePeriods = [];
-    this.history = [];
-=======
     this.setFinancialPeriod(null);
     this.periods = [];
     this.comparePeriods = [];
@@ -337,7 +298,6 @@ export class Dashboard implements OnInit {
 
     if (!this.pendingRestore) this.insightOpen = false;
     this.persist();
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     this.companyChanges.next(company.value);
   }
@@ -350,10 +310,7 @@ export class Dashboard implements OnInit {
     this.comparePeriods = this.periods.filter(option => option.value !== period.value);
 
     if (!this.selectedCompany) return;
-<<<<<<< HEAD
-=======
     this.persist();
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     this.periodChanges.next({
       companyId: this.selectedCompany.value,
@@ -365,10 +322,7 @@ export class Dashboard implements OnInit {
     this.selectedComparePeriod = comparePeriod;
 
     if (!this.selectedCompany || !this.selectedPeriod) return;
-<<<<<<< HEAD
-=======
     this.persist();
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
     this.periodChanges.next({
       companyId: this.selectedCompany.value,
@@ -377,8 +331,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-=======
   async downloadBoardReport(): Promise<void> {
     if (!this.selectedCompany || !this.selectedPeriod || this.isGeneratingReport) return;
 
@@ -494,7 +446,6 @@ export class Dashboard implements OnInit {
     }
   }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   retry(): void {
     this.errorMessage = null;
 
@@ -505,8 +456,6 @@ export class Dashboard implements OnInit {
     }
   }
 
-<<<<<<< HEAD
-=======
   private setFinancialPeriod(financialPeriod: FinancialPeriod | null): void {
     this.financialPeriod = financialPeriod;
     this.kpiCards = buildKpiCards(financialPeriod);
@@ -547,7 +496,6 @@ export class Dashboard implements OnInit {
       hasSeries(rows, 'netMargin');
   }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   private loadCompanies(): void {
     this.isLoadingCompanies = true;
     this.errorMessage = null;
@@ -560,24 +508,16 @@ export class Dashboard implements OnInit {
       )
       .subscribe({
         next: companies => {
-<<<<<<< HEAD
-          this.companies = companies.map(company => ({
-            label: company.companyName,
-=======
           this.exampleCompanyIds = new Set(
             companies.filter(company => company.isExample).map(company => company.companyId)
           );
           this.companies = companies.map(company => ({
             label: company.isExample ? `${company.companyName} (example dataset)` : company.companyName,
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             value: company.companyId
           }));
 
           this.emptyData = companies.length === 0;
-<<<<<<< HEAD
-=======
           this.restoreCompany();
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         },
         error: error => {
           this.errorMessage = errorMessage(error, 'Failed to load companies.');
@@ -595,19 +535,12 @@ export class Dashboard implements OnInit {
           label: period.periodLabel,
           value: period.period
         }));
-<<<<<<< HEAD
-        this.history = history;
-      }),
-      catchError(error => {
-        this.errorMessage = errorMessage(error, 'Failed to load company data.');
-=======
         this.setHistory(history);
         this.restorePeriods();
       }),
       catchError(error => {
         this.errorMessage = errorMessage(error, 'Failed to load company data.');
         this.pendingRestore = null;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         return EMPTY;
       }),
       finalize(() => (this.isLoadingCompany = false))
@@ -618,15 +551,9 @@ export class Dashboard implements OnInit {
     return this.companyService
       .getFinancialPeriod(request.companyId, request.period, request.compareTo)
       .pipe(
-<<<<<<< HEAD
-        tap(financialPeriod => (this.financialPeriod = financialPeriod)),
-        catchError(error => {
-          this.financialPeriod = null;
-=======
         tap(financialPeriod => this.setFinancialPeriod(financialPeriod)),
         catchError(error => {
           this.setFinancialPeriod(null);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
           this.errorMessage = errorMessage(error, 'Failed to load the financial period.');
           return EMPTY;
         }),

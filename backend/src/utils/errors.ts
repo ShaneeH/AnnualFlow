@@ -21,8 +21,6 @@ export class ReportValidationError extends AppError {
     }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * The uploaded document is not a financial report (e.g. a CV, invoice or
  * letter). Nothing may be written to the database for it.
@@ -33,7 +31,6 @@ export class NotFinancialReportError extends ReportValidationError {
     }
 }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 /** A required server-side setting (such as OPENAI_API_KEY) is missing. */
 export class ServiceConfigError extends AppError {
     constructor(message: string) {
@@ -48,11 +45,6 @@ export class AnalysisServiceError extends AppError {
     }
 }
 
-<<<<<<< HEAD
-/**
- * Converts known upstream (OpenAI SDK) failures into AppErrors.
- * Returns null when the error is not recognised.
-=======
 /** Keeps upstream messages short and single-line before showing them to users. */
 function shortMessage(error: { message?: string }): string {
     const message = String(error.message ?? "").replace(/\s+/g, " ").trim();
@@ -63,26 +55,15 @@ function shortMessage(error: { message?: string }): string {
  * Converts known upstream (OpenAI SDK) failures into AppErrors with a
  * specific, user-facing message. Returns null when the error is not
  * recognised.
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
  */
 export function toUpstreamAppError(error: unknown): AppError | null {
     if (error instanceof OpenAI.APIConnectionTimeoutError) {
         return new AppError(
-<<<<<<< HEAD
-            "The document analysis service timed out. Please try again.",
-=======
             "The AI service timed out. Please try again.",
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             504
         );
     }
 
-<<<<<<< HEAD
-    if (error instanceof OpenAI.RateLimitError) {
-        return new AppError(
-            "The document analysis service is busy. Please try again shortly.",
-            429
-=======
     if (error instanceof OpenAI.APIConnectionError) {
         return new AppError(
             "Could not reach the AI service. Check the server's internet connection and try again.",
@@ -162,14 +143,11 @@ function toDatabaseAppError(error: unknown): AppError | null {
         return new AppError(
             "The database is unavailable. Check DATABASE_URL and that PostgreSQL is running.",
             503
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         );
     }
 
     return null;
 }
-<<<<<<< HEAD
-=======
 
 /** Structured details of any error for server logs (never sent to clients). */
 export function describeError(error: unknown): Record<string, unknown> {
@@ -216,4 +194,3 @@ export function logServerError(
         JSON.stringify(describeError(error), null, 2)
     );
 }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

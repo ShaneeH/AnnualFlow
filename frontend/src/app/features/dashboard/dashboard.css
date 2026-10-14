@@ -30,14 +30,11 @@
 .dashboard-header {
   margin-bottom: clamp(1.75rem, 4vw, 3rem);
   position: relative;
-<<<<<<< HEAD
-=======
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem 2rem;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 
@@ -116,11 +113,6 @@
   padding: clamp(1.25rem, 3vw, 2rem);
   margin-bottom: 2rem;
   position: relative;
-<<<<<<< HEAD
-  overflow: hidden;
-}
-
-=======
   /* Visible so the Export menu can drop over the cards below. */
   overflow: visible;
   z-index: 5;
@@ -131,19 +123,13 @@
 .dashboard:has(.insight-panel) { z-index: 1100; }
 .report-header:has(.insight-panel) { z-index: 1100; }
 
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 /* gradient hairline replaces the flat top border */
 .report-header::before {
   content: '';
   position: absolute;
   top: 0;
-<<<<<<< HEAD
-  left: 0;
-  right: 0;
-=======
   left: var(--radius-medium);
   right: var(--radius-medium);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   opacity: 0.55;
@@ -184,44 +170,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-<<<<<<< HEAD
-/* company name gets the hero treatment — subtle orange-tinted gradient */
-.report-header-main > div:first-child h2 {
-  background: linear-gradient(135deg, var(--primary) 55%, var(--accent) 160%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
 
-.compare-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--surface-light);
-  border: 4px solid var(--border);
-  border-radius: 999px;
-  padding: 0.5rem 0.9rem;
-  flex-shrink: 0;
-
-}
-
-.compare-pill .report-label {
-  margin: 0;
-}
-
-.compare-value {
-
-  font-size: 1.05rem;
-  color: var(--accent);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-  font-variant-numeric: tabular-nums;
-}
-=======
-
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
 @media (max-width: 560px) {
   .report-header {
@@ -236,12 +185,6 @@
     gap: 1rem;
   }
 
-<<<<<<< HEAD
-  .compare-pill {
-    align-self: flex-start;
-  }
-=======
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 /* ---------- KPI grid ---------- */
@@ -413,8 +356,6 @@
 .dashboard-status {
   opacity: 0.8;
 }
-<<<<<<< HEAD
-=======
 
 .report-header-actions {
   display: flex;
@@ -548,4 +489,3 @@
   cursor: pointer;
 }
 .export-item:hover, .export-item:focus-visible { background: rgba(255, 255, 255, 0.06); outline: none; }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)

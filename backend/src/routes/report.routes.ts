@@ -3,19 +3,10 @@ import multer from "multer";
 
 import {
     deleteFinancialDocument,
-<<<<<<< HEAD
-    documentExistsByHash,
-    DuplicateDocumentError,
-    getDocumentById,
-    getDocuments,
-    getDocumentStats,
-    saveFinancialDocument
-=======
     DuplicateDocumentError,
     getDocumentById,
     getDocuments,
     getDocumentStats
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 } from "../services/documents.service";
 import {
     createReportCsv,
@@ -23,9 +14,6 @@ import {
     createReportPdf,
     getReportExportFilename
 } from "../services/report-export.service";
-<<<<<<< HEAD
-import { deletePDF, analysePDF, uploadPDF } from "../services/openai.service";
-=======
 import { getJobMode, JobStore, postgresJobStore } from "../services/jobs.service";
 import { deletePDF } from "../services/openai.service";
 import { ReportWorker } from "../services/report-worker";
@@ -34,28 +22,16 @@ import {
     defaultReportProcessingDeps,
     processReportUpload
 } from "../services/report-processing.service";
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import {
     exportLimiter,
     uploadLimiter
 } from "../middleware/rate-limit";
-<<<<<<< HEAD
-import { generateDocumentHash } from "../utils/document-hash";
-=======
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 import {
     maxPdfBytes,
     PdfUploadError,
     validatePdfUpload
 } from "../utils/pdf-upload";
 import { ProcessingIndicator } from "../utils/processing-indicator";
-<<<<<<< HEAD
-import { analysePrompt } from "../utils/prompts";
-import { AppError, ServiceConfigError, toUpstreamAppError } from "../utils/errors";
-import { parseAndValidateReport } from "../utils/report-validator";
-
-const router = Router();
-=======
 import { requireAuth, viewerId } from "../middleware/auth";
 import { analysePrompt } from "../utils/prompts";
 import {
@@ -100,7 +76,6 @@ export function configureReportJobs(overrides: Partial<JobRuntime>): JobRuntime 
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 const MAX_ID = 2_147_483_647;
 
 const upload = multer({
@@ -159,12 +134,6 @@ function logRouteError(
     context: string,
     error: unknown
 ): void {
-<<<<<<< HEAD
-    console.error(
-        `[reports] ${context} request=${res.locals.requestId}`,
-        error
-    );
-=======
     logServerError(`reports] [${context}`, res.locals.requestId, error);
 }
 
@@ -207,7 +176,6 @@ export function uploadErrorResponse(error: unknown): {
                 "The server log has the details for this request ID."
         }
     };
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 }
 
 function uploadSinglePdf(
@@ -271,10 +239,7 @@ router.get("/", async (req, res) => { const companyId = req.query.companyId === 
 
     try {
         return res.json(await getDocuments({
-<<<<<<< HEAD
-=======
             viewerId: viewerId(req),
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             companyId: companyId ?? undefined,
             limit: limit ?? undefined,
             offset: offset ?? undefined
@@ -285,11 +250,6 @@ router.get("/", async (req, res) => { const companyId = req.query.companyId === 
     }
 });
 
-<<<<<<< HEAD
-router.get("/stats", async (_req, res) => {
-    try {
-        return res.json(await getDocumentStats());
-=======
 router.get("/jobs/:jobId", requireAuth, async (req, res) => {
     const jobId = String(req.params.jobId ?? "");
     if (!UUID_PATTERN.test(jobId)) {
@@ -311,7 +271,6 @@ router.get("/jobs/:jobId", requireAuth, async (req, res) => {
 router.get("/stats", async (req, res) => {
     try {
         return res.json(await getDocumentStats(viewerId(req)));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     } catch (error) {
         logRouteError(res, "stats failed", error);
         return sendError(res, 500, "Failed to retrieve document statistics.");
@@ -325,11 +284,7 @@ router.get("/:documentId", async (req, res) => {
     }
 
     try {
-<<<<<<< HEAD
-        const document = await getDocumentById(documentId);
-=======
         const document = await getDocumentById(documentId, viewerId(req));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         return document
             ? res.json(document)
             : sendError(res, 404, "Document not found.");
@@ -346,11 +301,7 @@ router.get("/:documentId/export.pdf", exportLimiter, async (req, res) => {
     }
 
     try {
-<<<<<<< HEAD
-        const document = await getDocumentById(documentId);
-=======
         const document = await getDocumentById(documentId, viewerId(req));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const pdf = createReportPdf(document);
@@ -374,11 +325,7 @@ router.get("/:documentId/export.csv", exportLimiter, async (req, res) => {
     }
 
     try {
-<<<<<<< HEAD
-        const document = await getDocumentById(documentId);
-=======
         const document = await getDocumentById(documentId, viewerId(req));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const csv = createReportCsv(document);
@@ -401,11 +348,7 @@ router.get("/:documentId/export.json", exportLimiter, async (req, res) => {
     }
 
     try {
-<<<<<<< HEAD
-        const document = await getDocumentById(documentId);
-=======
         const document = await getDocumentById(documentId, viewerId(req));
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!document) return sendError(res, 404, "Document not found.");
 
         const json = createReportJson(document);
@@ -423,20 +366,13 @@ router.get("/:documentId/export.json", exportLimiter, async (req, res) => {
 
 router.post(
     "/add",
-<<<<<<< HEAD
-=======
     requireAuth,
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     uploadLimiter,
     uploadSinglePdf,
     async (req, res) => {
         const progress = new ProcessingIndicator(
             String(res.locals.requestId ?? "unknown")
         );
-<<<<<<< HEAD
-        let uploadedPdfId: string | null = null;
-=======
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
         try {
             if (!req.file) {
@@ -446,31 +382,6 @@ router.post(
             progress.start("Validating PDF");
             validatePdfUpload(req.file);
 
-<<<<<<< HEAD
-            const pdf = req.file.buffer;
-            const documentHash = generateDocumentHash(pdf);
-
-            progress.update("Checking for duplicates");
-            if (await documentExistsByHash(documentHash)) {
-                throw new DuplicateDocumentError();
-            }
-
-            progress.update("Uploading secure working copy");
-            uploadedPdfId = await uploadPDF(pdf, req.file.originalname);
-
-            progress.update("Extracting financial periods");
-            const aiResponse = await analysePDF(uploadedPdfId, analysePrompt);
-
-            progress.update("Validating and saving results");
-            const report = parseAndValidateReport(aiResponse);
-            const { documentId, conflicts } = await saveFinancialDocument(
-                documentHash,
-                uploadedPdfId,
-                report
-            );
-
-            progress.succeed(`Saved ${report.reportName}`);
-=======
             const runtime = getJobRuntime();
 
             if (runtime.mode === "async") {
@@ -508,60 +419,15 @@ router.post(
             );
 
             progress.succeed(`Saved ${result.report.reportName}`);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
 
             return res.status(201).json({
                 success: true,
                 message: "The PDF was successfully uploaded and analysed.",
-<<<<<<< HEAD
-                documentId,
-                uploadedPdfId,
-                documentHash,
-                report,
-                conflicts
-=======
                 ...result
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
             });
         } catch (error) {
             progress.fail("Document processing failed");
 
-<<<<<<< HEAD
-            if (uploadedPdfId) {
-                await deletePDF(uploadedPdfId);
-            }
-
-            if (error instanceof DuplicateDocumentError) {
-                return sendError(res, 409, error.message);
-            }
-            if (error instanceof PdfUploadError) {
-                return sendError(res, error.status, error.message);
-            }
-
-            const appError = error instanceof AppError
-                ? error
-                : toUpstreamAppError(error);
-
-            if (appError && appError.status < 500) {
-                return sendError(res, appError.status, appError.message);
-            }
-
-            logRouteError(res, "processing failed", error);
-
-            if (error instanceof ServiceConfigError) {
-                return sendError(res, 503, "The document analysis service is not configured.");
-            }
-
-            if (appError) {
-                return sendError(res, appError.status, appError.message);
-            }
-
-            return sendError(
-                res,
-                500,
-                "The document could not be processed. Check the request ID in the server logs."
-            );
-=======
             if (
                 !(error instanceof DuplicateDocumentError) &&
                 !(error instanceof PdfUploadError)
@@ -581,27 +447,18 @@ router.post(
                 ...body,
                 requestId: res.locals.requestId
             });
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         }
     }
 );
 
-<<<<<<< HEAD
-router.delete("/:documentId", async (req, res) => {
-=======
 router.delete("/:documentId", requireAuth, async (req, res) => {
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
     const documentId = parsePositiveInteger(req.params.documentId);
     if (documentId === null) {
         return sendError(res, 400, "Invalid document ID.");
     }
 
     try {
-<<<<<<< HEAD
-        const deleted = await deleteFinancialDocument(documentId);
-=======
         const deleted = await deleteFinancialDocument(documentId, req.user!.id);
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
         if (!deleted) {
             return sendError(res, 404, "Document not found.");
         }

@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-
-@Component({
-  selector: 'app-navbar',
-  imports: [RouterLink],
-  templateUrl: './navbar.html',
-  styleUrl: './navbar.css',
-})
-export class Navbar {}
-=======
 import { Component, HostListener, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,4 +36,3 @@ export class Navbar {
     this.menuOpen = false;
   }
 }
->>>>>>> 9459a5f (major  update with rebranding, authentication, and UI improvements)
